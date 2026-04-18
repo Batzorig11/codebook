@@ -323,8 +323,11 @@ export default function CodebookPage() {
         {codebookData.map((item, index) => (
           <div key={index} className="flex flex-col gap-3">
             <FuncName>{item.funcname}</FuncName>
+            <div className="">Syntax:</div>
             <Syntax>{item.syntax}</Syntax>
+            <div className="">Тайлбар:</div>
             <Explanation>{item.explanation}</Explanation>
+            <div className="">Жишээ:</div>
             <Example>{item.example}</Example>
             {item.img && (
               <Image
