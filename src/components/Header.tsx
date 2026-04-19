@@ -10,7 +10,13 @@ export default function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-4 bg-[#2F3129]/80 backdrop-blur-sm border-b border-white/10">
       <Link href="/">
-        <Image src="/kami-logo.png" alt="Kami Logo" width={100} height={10} />
+        <Image
+          src="/kami-logo.png"
+          alt="Kami Logo"
+          width={100}
+          height={48}
+          style={{ height: "auto" }}
+        />
       </Link>
 
       <div className="flex items-center gap-6">
