@@ -6,6 +6,13 @@ import Explanation from "@/components/Explanation";
 import Example from "@/components/Example";
 import Link from "next/link";
 import Image from "next/image";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  ArrowLeft02Icon,
+  BookOpen01Icon,
+  CodeIcon,
+  GameController03Icon,
+} from "@hugeicons/core-free-icons";
 
 // const codebookData: {
 //   funcname: string;
@@ -309,38 +316,90 @@ const codebookData: {
 
 export default function CodebookPage() {
   return (
-    <main className="flex flex-col items-center min-h-screen px-6 pt-5">
-      <Link
-        href="/"
-        className="self-start mb-8 text-white/50 hover:text-white transition-colors"
-      >
-        &larr; Back
-      </Link>
+    <main className="min-h-screen px-4 py-8 text-[#17324d] dark:text-[#e7f7ff] sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        <Link
+          href="/"
+          className="kid-focus mb-6 inline-flex items-center gap-2 rounded-lg bg-white px-4 py-3 text-sm font-black text-[#17324d] shadow-sm transition hover:-translate-y-0.5 hover:bg-[#e0f2fe] dark:bg-[#0f2742] dark:text-[#e7f7ff] dark:hover:bg-[#132f4d]"
+        >
+          <HugeiconsIcon icon={ArrowLeft02Icon} size={18} strokeWidth={2.2} />
+          Нүүр рүү буцах
+        </Link>
 
-      <h1 className="text-5xl font-light tracking-wide mb-12">Codebook</h1>
-
-      <div className="w-full max-w-3xl flex flex-col gap-10">
-        {codebookData.map((item, index) => (
-          <div key={index} className="flex flex-col gap-3">
-            <FuncName>{item.funcname}</FuncName>
-            <div className="">Syntax:</div>
-            <Syntax>{item.syntax}</Syntax>
-            <div className="">Тайлбар:</div>
-            <Explanation>{item.explanation}</Explanation>
-            <div className="">Жишээ:</div>
-            <Example>{item.example}</Example>
-            {item.img && (
-              <Image
-                src={item.img}
-                alt={item.funcname}
-                className="rounded-lg mt-2"
-                width={400}
-                height={400}
-              />
-            )}
-            <hr />
+        <section className="mb-8 rounded-lg border-2 border-[#17324d]/10 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#0f2742] sm:p-8">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="mb-3 inline-flex items-center gap-2 rounded-lg bg-[#dcfce7] px-3 py-2 text-sm font-black text-[#166534]">
+                <HugeiconsIcon icon={BookOpen01Icon} size={18} strokeWidth={2} />
+                Кодын лавлах
+              </p>
+              <h1 className="font-pixel text-3xl leading-tight text-[#17324d] dark:text-[#e7f7ff] sm:text-5xl">
+                Codebook
+              </h1>
+            </div>
+            <p className="max-w-2xl text-base font-semibold leading-7 text-[#5b7086] dark:text-[#b8d7e8]">
+              Команд бүрийн бичиглэл, тайлбар, жишээг нэг дороос хараарай.
+            </p>
           </div>
-        ))}
+        </section>
+
+        <div className="grid gap-5 lg:grid-cols-2">
+          {codebookData.map((item, index) => (
+            <article
+              key={item.funcname}
+              className="grid gap-5 rounded-lg border-2 border-[#17324d]/10 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#0f2742] sm:p-6"
+            >
+              <div className="flex items-start gap-3">
+                <span className="rounded-lg bg-[#ffdf6e] p-2 text-[#17324d]">
+                  <HugeiconsIcon
+                    icon={index % 2 === 0 ? CodeIcon : GameController03Icon}
+                    size={24}
+                    strokeWidth={2.2}
+                  />
+                </span>
+                <div>
+                  <FuncName>{item.funcname}</FuncName>
+                  <p className="text-sm font-black uppercase tracking-wide text-[#0f766e] dark:text-[#67e8f9]">
+                    Команд {index + 1}
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <h2 className="mb-2 text-sm font-black uppercase tracking-wide text-[#64748b] dark:text-[#b8d7e8]">
+                  Syntax
+                </h2>
+                <Syntax>{item.syntax}</Syntax>
+              </div>
+
+              <div>
+                <h2 className="mb-2 text-sm font-black uppercase tracking-wide text-[#64748b] dark:text-[#b8d7e8]">
+                  Тайлбар
+                </h2>
+                <Explanation>{item.explanation}</Explanation>
+              </div>
+
+              <div>
+                <h2 className="mb-2 text-sm font-black uppercase tracking-wide text-[#64748b] dark:text-[#b8d7e8]">
+                  Жишээ
+                </h2>
+                <Example>{item.example}</Example>
+              </div>
+
+              {item.img && (
+                <div className="rounded-lg bg-[#f8fafc] p-3 dark:bg-[#10243a]">
+                  <Image
+                    src={item.img}
+                    alt={`${item.funcname} командын зурагт тайлбар`}
+                    className="h-auto w-full rounded-lg object-contain"
+                    width={400}
+                    height={400}
+                  />
+                </div>
+              )}
+            </article>
+          ))}
+        </div>
       </div>
     </main>
   );

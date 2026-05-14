@@ -1,7 +1,7 @@
 export default function Syntax({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-[#1a1c2e] rounded-lg px-5 py-4 my-2">
-      <pre className="text-[#7aa2f7] text-lg font-semibold whitespace-pre-wrap leading-relaxed">
+    <div className="my-2 overflow-x-auto rounded-lg border-2 border-[#17324d]/10 bg-[#102033] px-5 py-4 dark:border-white/10 dark:bg-[#07111d]">
+      <pre className="whitespace-pre-wrap text-base font-bold leading-7 text-[#93e5ff] sm:text-lg">
         {children}
       </pre>
     </div>
