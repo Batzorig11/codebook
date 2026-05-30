@@ -41,6 +41,15 @@ export default function RootLayout({
       className={cn("h-full antialiased", inter.variable, publicPixel.variable)}
       suppressHydrationWarning
     >
+      <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XNZ1PXD3Y9"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-XNZ1PXD3Y9');
+</script>
       <body className="min-h-full flex flex-col bg-[#f5fbff] text-[#17324d] pt-16 font-sans dark:bg-[#081827] dark:text-[#e7f7ff]">
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <Header />
