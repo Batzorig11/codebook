@@ -44,13 +44,7 @@ export default function Header() {
           <HugeiconsIcon icon={SchoolIcon} size={18} strokeWidth={2} />
           Гарын авлага
         </Link>
-        <Link
-          href="/kami-2"
-          className="kid-focus hidden items-center gap-2 rounded-lg px-3 py-2 text-sm font-bold text-[#17324d] transition hover:bg-[#e0f2fe] dark:text-[#e7f7ff] dark:hover:bg-white/10 md:inline-flex"
-        >
-          <HugeiconsIcon icon={GameController03Icon} size={18} strokeWidth={2} />
-          Kami-2
-        </Link>
+       
         <Link
           href="/codebook"
           className="kid-focus inline-flex items-center gap-2 rounded-lg bg-[#17324d] px-3 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-[#23527d] dark:bg-[#ffd54f] dark:text-[#17324d] dark:hover:bg-[#ffe27a]"

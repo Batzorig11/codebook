@@ -134,17 +134,7 @@ export default function Home() {
                   />
                   Сурагчийн гарын авлага
                 </Link>
-                <Link
-                  href="/kami-2"
-                  className="kid-focus inline-flex items-center justify-center gap-2 rounded-lg border-2 border-white bg-white/12 px-5 py-4 text-base font-black text-white backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/22"
-                >
-                  <HugeiconsIcon
-                    icon={GameController03Icon}
-                    size={22}
-                    strokeWidth={2.2}
-                  />
-                  Kami-2 JavaScript
-                </Link>
+               
               </div>
             </div>
           </div>
