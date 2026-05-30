@@ -134,7 +134,55 @@ export default function Home() {
                   />
                   Сурагчийн гарын авлага
                 </Link>
+                <Link
+                  href="/kami-2"
+                  className="kid-focus inline-flex items-center justify-center gap-2 rounded-lg border-2 border-white bg-white/12 px-5 py-4 text-base font-black text-white backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/22"
+                >
+                  <HugeiconsIcon
+                    icon={GameController03Icon}
+                    size={22}
+                    strokeWidth={2.2}
+                  />
+                  Kami-2 JavaScript
+                </Link>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="kami-2" className="px-4 py-12 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl rounded-lg border-2 border-[#17324d]/10 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#0f2742] sm:p-8">
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+              <div>
+                <p className="mb-3 inline-flex items-center gap-2 rounded-lg bg-[#dcfce7] px-3 py-2 text-sm font-black text-[#166534]">
+                  <HugeiconsIcon
+                    icon={GameController03Icon}
+                    size={18}
+                    strokeWidth={2}
+                  />
+                  Ахисан түвшин
+                </p>
+                <h2 className="text-3xl font-black tracking-tight text-[#17324d] dark:text-[#e7f7ff] sm:text-4xl">
+                  Kami-2 JavaScript game builder
+                </h2>
+                <p className="mt-4 max-w-3xl text-base font-semibold leading-7 text-[#48647d] dark:text-[#b8d7e8]">
+                  Kami-1-ийн дараагийн 10 өдрийн curriculum. Сурагчид платформ
+                  дээр даалгавар шийдэхгүй, өөрийн browser platformer тоглоомыг
+                  HTML, CSS, JavaScript-ээр эхнээс нь бүтээнэ.
+                </p>
+              </div>
+
+              <Link
+                href="/kami-2"
+                className="kid-focus inline-flex w-fit items-center justify-center gap-2 rounded-lg bg-[#17324d] px-5 py-4 text-sm font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#23527d] dark:bg-[#ffd54f] dark:text-[#17324d] dark:hover:bg-[#ffe27a]"
+              >
+                Curriculum нээх
+                <HugeiconsIcon
+                  icon={ArrowRight02Icon}
+                  size={18}
+                  strokeWidth={2.2}
+                />
+              </Link>
             </div>
           </div>
         </section>

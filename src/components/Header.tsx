@@ -3,7 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { BookOpen01Icon, Home03Icon, SchoolIcon } from "@hugeicons/core-free-icons";
+import {
+  BookOpen01Icon,
+  GameController03Icon,
+  Home03Icon,
+  SchoolIcon,
+} from "@hugeicons/core-free-icons";
 import ThemeToggle from "@/components/ThemeToggle";
 // import { useState } from "react";
 
@@ -38,6 +43,13 @@ export default function Header() {
         >
           <HugeiconsIcon icon={SchoolIcon} size={18} strokeWidth={2} />
           Гарын авлага
+        </Link>
+        <Link
+          href="/kami-2"
+          className="kid-focus hidden items-center gap-2 rounded-lg px-3 py-2 text-sm font-bold text-[#17324d] transition hover:bg-[#e0f2fe] dark:text-[#e7f7ff] dark:hover:bg-white/10 md:inline-flex"
+        >
+          <HugeiconsIcon icon={GameController03Icon} size={18} strokeWidth={2} />
+          Kami-2
         </Link>
         <Link
           href="/codebook"
