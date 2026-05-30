@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import "./globals.css";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
+import Script from "next/script"
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
@@ -41,17 +42,21 @@ export default function RootLayout({
       className={cn("h-full antialiased", inter.variable, publicPixel.variable)}
       suppressHydrationWarning
     >
-      <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-XNZ1PXD3Y9"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-XNZ1PXD3Y9');
-</script>
       <body className="min-h-full flex flex-col bg-[#f5fbff] text-[#17324d] pt-16 font-sans dark:bg-[#081827] dark:text-[#e7f7ff]">
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <Script id="theme-script" dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-XNZ1PXD3Y9"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){window.dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-XNZ1PXD3Y9');
+          `}
+        </Script>
         <Header />
         {children}
       </body>
