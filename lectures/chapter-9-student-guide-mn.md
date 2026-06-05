@@ -1,56 +1,15 @@
 # Бүлэг 9: Class ба object
 
-## Хичээлийн сэдэв
-**Class ашиглан өөрийн object-ийг хэрхэн үүсгэх вэ?**
-
-## Зорилго
-Энэ хичээлийн дараа сурагчид:
-
-- Class гэж юу болохыг ойлгоно
-- Class-аас object үүсгэнэ
-- Object-ийн шинж чанар буюу member хадгална
-- `__init__()` ашиглан object эхлүүлнэ
-- Class method тодорхойлж дуудаж сурна
-- `self` параметрийн үндсэн үүргийг ойлгоно
-- Object-ийг function-д дамжуулж тоглоомын үйлдэл хийнэ
+> **Энэ хичээлээр:**
+> Class ашиглан өөрийн төрлийн объект үүсгэх, шинж чанар болон method ашиглах үндсийг сурна.
 
 ---
 
-## 1. Class гэж юу вэ?
+# Алхам 1: Class гэж юу вэ? (Загвар)
 
-**Class** гэдэг нь ижил төрлийн object үүсгэх загвар юм.
+Class гэдэг нь ижил төрлийн object үүсгэх загвар юм. Жишээ нь, "Road" class нь замын object үүсгэх загвар болно.
 
-Жишээ:
-
-```python
-class road:
-    pass
-```
-
-Энэ код `road` нэртэй class үүсгэж байна.
-
-Class нь object үүсгэх хэв загвар гэж ойлгож болно.
-
----
-
-## 2. Object гэж юу вэ?
-
-**Object** гэдэг нь class-аас үүссэн бодит нэгж юм.
-
-```python
-class road:
-    pass
-
-wood_road = road()
-```
-
-Энд `wood_road` нь `road` class-аас үүссэн object юм.
-
----
-
-## 3. __init__() гэж юу вэ?
-
-`__init__()` нь object үүсэх үед автоматаар ажилладаг эхлүүлэх function юм.
+**Class үүсгэх:**
 
 ```python
 class road:
@@ -58,13 +17,242 @@ class road:
         self.material = material
 ```
 
-Энэ code object үүсэх үед `material` утгыг object дотор хадгална.
+**Object үүсгэх:**
+
+```python
+wood_road = road("wood")
+stone_road = road("stone")
+```
+
+| Ойлголт | Тайлбар | Жишээ |
+| --- | --- | --- |
+| Class | Object үүсгэх загвар. | `class road:` |
+| Object | Class-аас үүссэн бодит нэгж. | `wood_road = road("wood")` |
+| Member | Object доторх шинж чанар. | `self.material` |
+
+> **Гол санаа:**
+> Class = загвар, Object = загвараас үүссэн бодит зүйл.
 
 ---
 
-## 4. Member буюу шинж чанар
+# Алхам 2: __init__() ашиглах (Object эхлүүлэх)
 
-Object дотор хадгалагдсан мэдээллийг member буюу шинж чанар гэж ойлгож болно.
+`__init__()` нь object үүсэх үед автоматаар ажилладаг функц. Энд object-ийн эхлэл утгуудыг тохируулна.
+
+```python
+class road:
+    def __init__(self, material):
+        self.material = material
+
+# Object үүсгэх
+wood_road = road("wood")
+```
+
+**Яаж ажилладаг вэ?**
+
+1. `road("wood")` — object үүсгэх
+2. `__init__()` автоматаар дуудагдана
+3. `self.material = "wood"` — шинж чанар хадгална
+
+**Олон шинж чанар:**
+
+```python
+class house:
+    def __init__(self, color, size):
+        self.color = color
+        self.size = size
+
+my_house = house("red", "big")
+player.speak(my_house.color)  # red
+```
+
+> **Анхаарах:**
+> `__init__` функцэд `self` параметр заавал хэрэгтэй. `self` нь object-ийг өөрөө заана.
+
+---
+
+# Алхам 3: self гэж юу вэ? (Object-ийг заах)
+
+`self` нь object-ийг өөрөө заах тусгай параметр. Class дотор `self` ашиглан object-ийн шинж чанар, method-д хандаж болно.
+
+```python
+class pump:
+    def __init__(self, item_type):
+        self.item_type = item_type
+    
+    def refill(self, amount):
+        player.speak("Refilling " + self.item_type)
+        # Дүүргэх код энд
+
+water_pump = pump("water")
+water_pump.refill(5)
+```
+
+**Гаралт:**
+```
+Refilling water
+```
+
+| Код | Утга |
+| --- | --- |
+| `self.item_type` | Энэ object-ийн item_type шинж чанар |
+| `water_pump.refill(5)` | water_pump object-ийн refill method дуудна |
+
+> **Анхаарах:**
+> `self.material == material` гэвэл харьцуулалт хийгдэнэ. Утга оноохдоо `=` ашиглана.
+
+---
+
+# Алхам 4: Method ашиглах (Object-ийн функц)
+
+Method гэдэг нь class дотор тодорхойлсон функц. Object бүр өөрийн method-той байж болно.
+
+```python
+class animal:
+    def __init__(self, name):
+        self.name = name
+    
+    def speak(self):
+        player.speak("My name is " + self.name)
+    
+    def feed(self, food):
+        player.speak(self.name + " is eating " + food)
+
+# Object үүсгэх
+cow = animal("Bessie")
+
+# Method дуудах
+cow.speak()           # My name is Bessie
+cow.feed("grass")     # Bessie is eating grass
+```
+
+**Method vs Функц:**
+
+| Method | Функц |
+| --- | --- |
+| Class дотор тодорхойлсон | Гадна тодорхойлсон |
+| Object-д харьяалагдана | Бие даана ажиллана |
+| `object.method()` хэлбэрэд дуудна | `function()` хэлбэрээр дуудна |
+
+---
+
+# Алхам 5: Тоглоомын түвшинд хэрэглэх
+
+**Level 1: Creating a Class**
+
+Class ашиглан өвсний овооны object үүсгэж `build()` функцэд дамжуулна.
+
+```python
+class haystack:
+    def __init__(self, size):
+        self.size = size
+
+small_hay = haystack("small")
+player.build(small_hay)
+```
+
+**Level 2: Class Members**
+
+`__init__()` ашиглан замын материал гэх мэт шинж чанарыг object-д хадгална.
+
+```python
+class road:
+    def __init__(self, material, length):
+        self.material = material
+        self.length = length
+
+wood_road = road("wood", 10)
+player.speak(wood_road.material)  # wood
+```
+
+**Level 3-4: Class Methods**
+
+Object-ийн method дотор нөхцөл ашиглан хоол эсвэл ус дүүргэнэ.
+
+```python
+class pump:
+    def __init__(self, item_type):
+        self.item_type = item_type
+        self.amount = 0
+    
+    def refill(self, amount):
+        self.amount += amount
+        player.speak("Refilled " + str(amount) + " " + self.item_type)
+
+water_pump = pump("water")
+water_pump.refill(5)
+```
+
+**Нийтлэг алдаа (Анхаарах зүйлс):**
+
+| Алдаа | Яагаад буруу вэ? | Зөв хэлбэр |
+| --- | --- | --- |
+| `class road` | `:` тэмдэг дутуу. | `class road:` |
+| `def __init__(material):` | `self` параметр дутуу. | `def __init__(self, material):` |
+| `self.material == material` | Утга оноохдоо `=` ашиглана. | `self.material = material` |
+| `pump.refill` | Method дуудахад `()` хэрэгтэй. | `pump.refill("food")` |
+
+---
+
+# Quiz: Өөрийгөө шалгаарай
+
+## Асуулт 1
+Class гэж юу вэ?
+
+- А) Object үүсгэх загвар
+- Б) Функцийн нэр
+- В) Хувьсагчийн төрөл
+- Г) Жагсаалтын нэр
+
+**Зөв хариулт:** А
+**Тайлбар:** Class нь object үүсгэх загвар бөгөөд object бүр өөрийн шинж чанар, method-той байж чадна.
+
+## Асуулт 2
+Object гэж юу вэ?
+
+- А) Class-аас үүссэн бодит нэгж
+- Б) Функцийн аргумент
+- В) Хувьсагчийн утга
+- Г) Жагсаалтын индекс
+
+**Зөв хариулт:** А
+**Тайлбар:** Object нь class-аас үүссэн бодит нэгж бөгөөд өөрийн шинж чанар, method-той.
+
+## Асуулт 3
+`__init__()` хэзээ ажилладаг вэ?
+
+- А) Object устгах үед
+- Б) Object үүсэх үед
+- В) Method дуудах үед
+- Г) Программ ажиллах үед
+
+**Зөв хариулт:** Б
+**Тайлбар:** `__init__()` нь object үүсэх үед автоматаар ажилладаг эхлүүлэх функц.
+
+## Асуулт 4
+`self` ямар үүрэгтэй вэ?
+
+- А) Object-ийг заах
+- Б) Функцийг устгах
+- В) Жагсаалт үүсгэх
+- Г) Кодыг хурдасгах
+
+**Зөв хариулт:** А
+**Тайлбар:** `self` нь object-ийг өөрөө заах тусгай параметр. Class дотор ашиглана.
+
+## Асуулт 5
+Method ба энгийн функцийн ялгаа юу вэ?
+
+- А) Ялгаагүй
+- Б) Method = class дотор, Функц = гадна
+- В) Method = гадна, Функц = class дотор
+- Г) Method = удаан, Функц = хурдан
+
+**Зөв хариулт:** Б
+**Тайлбар:** Method нь class дотор тодорхойлсон бөгөөд object-д харьяалагдана. Функц нь бие даана байна.
+
+## Асуулт 6
+Дараах кодны гаралтыг ол.
 
 ```python
 class road:
@@ -75,274 +263,85 @@ wood_road = road("wood")
 player.speak(wood_road.material)
 ```
 
-Гаралт:
+- А) road
+- Б) wood
+- В) material
+- Г) Алдаа гарна
 
-```text
-wood
-```
+**Зөв хариулт:** Б
+**Тайлбар:** `wood_road = road("wood")` object үүсгэхэд `self.material = "wood"` болно.
 
 ---
 
-## 5. Method гэж юу вэ?
+# Дүгнэлт
 
-**Method** гэдэг нь class дотор тодорхойлсон function юм.
+Энэ бүлэгт чи:
+
+1. Class гэж юу болохыг ойлголоо
+2. Object үүсгэх аргыг сурлаа
+3. `__init__()` функцийг сурлаа
+4. `self` параметрийн ач холбогдлыг ойлголоо
+5. Method гэж юу болохыг сурлаа
+6. Object-ийг функцэд дамжуулахыг сурлаа
+
+Class нь object үүсгэх загвар бөгөөд object бүр өөрийн шинж чанар, method-той байж чадна.
+
+---
+
+# Гол санаа
+
+- Class = object үүсгэх загвар
+- `__init__()` = object үүсэх үед ажиллана
+- `self` = object-ийг заана
+- Method = class доторх функц
+- Object = class-аас үүссэн бодит нэгж
+- `self.material = value` = шинж чанар хадгална
+
+---
+
+# Гэрийн даалгавар
+
+## Даалгавар 1: Class үүсгэх
+
+"box" class үүсгээд нэг шинж чанар хадгал.
 
 ```python
-class pump:
-    def refill(self, item):
-        player.speak("refill " + item)
-
-water_pump = pump()
-water_pump.refill("water")
-```
-
-Method дуудахад object-ийн нэр, цэг, method-ийн нэрийг бичнэ.
-
----
-
-## 6. self ямар үүрэгтэй вэ?
-
-`self` нь тухайн object өөрийгөө зааж байгаа параметр юм.
-
-```python
-class road:
-    def __init__(self, material):
-        self.material = material
-```
-
-Энд `self.material` нь object дотор хадгалагдах шинж чанар.
-
-`material` нь `__init__()` function-д орж ирсэн argument юм.
-
----
-
-## 7. Object-ийг тоглоомын command-д ашиглах
-
-Object-ийг function-д argument болгон дамжуулж болно.
-
-```python
-class road:
-    def __init__(self, material):
-        self.material = material
-
-wood_road = road("wood")
-player.build(wood_road)
-```
-
-Энэ жишээнд `wood_road` object-ийг `player.build()` function-д дамжуулж байна.
-
----
-
-## 8. Game-based coding жишээ
-
-Доорх код замын object үүсгээд тоглоомын дүрээр бариулж байна.
-
-```python
-import player
-
-class road:
-    def __init__(self, material):
-        self.material = material
-
-wood_road = road("wood")
-player.build(wood_road)
-```
-
----
-
-## 9. Түвшин бүрийн тайлбар
-
-### Level 1: Creating a Class
-
-Зорилго: Талбайн бүх үр тариаг цуглуулж, class ашиглан өвсний овоог бүтээ.
-
-Гол санаа: Class ашиглан өвсний овооны object үүсгэж `build()` function-д дамжуулна.
-
-### Level 2: Class Members
-
-Зорилго: Талбайн материалуудыг цуглуулж, замуудыг бүтээ.
-
-Гол санаа: `__init__()` ашиглан замын материал гэх мэт шинж чанарыг object-д хадгална.
-
-### Level 3: Class Methods
-
-Зорилго: Талбайн материалуудыг цуглуулж тахиануудад шинэ байшингууд барь.
-
-Гол санаа: Тахианы байшинд өнгө, хэмжээ зэрэг шинж чанар оноож барина.
-
-### Level 4: Class Functions
-
-Зорилго: Үхрүүдийн тэвшнүүдийн хажууд байрлах насосны object-ийн function-уудыг идэвхжүүлж ус, хоолыг нь дахин дүүргэ.
-
-Гол санаа: Object-ийн method дотор нөхцөл ашиглан хоол эсвэл ус дүүргэнэ.
-
----
-
-## 10. Дасгал 1
-
-`class box:` гэж class үүсгээд нэг шинж чанар хадгал.
-
-### Жишээ хариу
-
-```python
+# Энд кодоо бич
 class box:
     def __init__(self, color):
         self.color = color
 
 red_box = box("red")
+player.speak(red_box.color)
 ```
 
----
+## Даалгавар 2: Object үүсгэх
 
-## 11. Дасгал 2
+"animal" class-аас object үүсгэж, нэрийг нь хэлүүл.
 
-`wood_road = road("wood")` мөр object хэрхэн үүсгэж байгааг тайлбарла.
+```python
+# Энд кодоо бич
+class animal:
+    def __init__(self, name):
+        self.name = name
 
-### Жишээ хариу
-
-```text
-road("wood") нь road class-аас шинэ object үүсгэнэ. "wood" утга __init__() рүү дамжиж material шинж чанарт хадгалагдана.
+cat = animal("Kitty")
+player.speak(cat.name)
 ```
 
----
-
-## 12. Дасгал 3
+## Даалгавар 3: Method бичих
 
 Object-ийн method дуудах жишээ бич.
 
-### Жишээ хариу
-
 ```python
+# Энд кодоо бич
 class pump:
-    def refill(self, item):
-        player.speak(item)
+    def __init__(self, item):
+        self.item = item
+    
+    def refill(self):
+        player.speak("Refilling " + self.item)
 
-pump1 = pump()
-pump1.refill("food")
+water_pump = pump("water")
+water_pump.refill()
 ```
-
----
-
-## 13. Түгээмэл алдаа
-
-### Алдаа 1: Class-ийн дараа `:` мартах
-
-Буруу:
-
-```python
-class road
-```
-
-Зөв:
-
-```python
-class road:
-```
-
----
-
-### Алдаа 2: `self` параметр мартах
-
-Буруу:
-
-```python
-def __init__(material):
-    self.material = material
-```
-
-Зөв:
-
-```python
-def __init__(self, material):
-    self.material = material
-```
-
----
-
-### Алдаа 3: Утга оноохдоо `==` ашиглах
-
-Буруу:
-
-```python
-self.material == material
-```
-
-Зөв:
-
-```python
-self.material = material
-```
-
----
-
-### Алдаа 4: Method дуудахад `()` мартах
-
-Буруу:
-
-```python
-pump.refill
-```
-
-Зөв:
-
-```python
-pump.refill("food")
-```
-
----
-
-## 14. Богино Quiz
-
-### 1. Class гэж юу вэ?
-
-A. Object үүсгэх загвар
-B. Зөвхөн тоо хадгалдаг хувьсагч
-C. Comment эхлүүлэх тэмдэг
-D. Давталтын тоолуур
-
-**Хариулт: A. Object үүсгэх загвар**
-
----
-
-### 2. `__init__()` хэзээ ажилладаг вэ?
-
-A. Object үүсэх үед
-B. Comment бичих үед
-C. List хоосон үед
-D. Код дууссаны дараа л
-
-**Хариулт: A. Object үүсэх үед**
-
----
-
-### 3. Method гэж юу вэ?
-
-A. Class доторх function
-B. Dictionary-ийн key
-C. Текстийн хашилт
-D. Давталтын index
-
-**Хариулт: A. Class доторх function**
-
----
-
-## 15. Дүгнэлт
-
-Өнөөдрийн хичээлээр бид:
-
-- Class гэж юу болохыг ойлголоо
-- Class-аас object үүсгэлээ
-- `__init__()` ашиглан object эхлүүллээ
-- `self` ашиглан object-ийн шинж чанар хадгаллаа
-- Method тодорхойлж дуудаж сурлаа
-- Object-ийг тоглоомын function-д дамжууллаа
-
----
-
-## Гэрийн даалгавар
-
-Дараах 3 даалгаврыг өөрөө бич:
-
-1. `class animal:` үүсгээд `name` шинж чанар хадгал
-2. `animal` object үүсгээд `name` утгыг хэлүүл
-3. `class tool:` дотор `use()` method үүсгээд дуудаж турш

@@ -1,562 +1,360 @@
-# Бүлэг 7: Функц / Function
+# Бүлэг 7: Өөрийн функц үүсгэх
 
-## Хичээлийн сэдэв
-**Python функц гэж юу вэ?**
-
-## Зорилго
-Энэ хичээлийн дараа сурагчид:
-
-- Функц гэж юу болохыг ойлгоно
-- `def` ашиглан функц үүсгэнэ
-- Функцийг дуудаж ажиллуулна
-- Давтагдсан кодыг функц болгож богиносгоно
-- Parameter буюу оролттой функц бичиж сурна
+> **Энэ хичээлээр:**
+> Давтагддаг үйлдлүүдээ өөрийн нэртэй функц болгон бичиж, дахин ашиглаж сурна.
 
 ---
 
-## 1. Function гэж юу вэ?
+# Алхам 1: Функц гэж юу вэ? (Өөрийн тушаал)
 
-**Function** гэдэг нь тодорхой нэг үйлдлийг хийхээр хадгалсан кодын хэсэг юм.
+Функц гэдэг нь тодорхой үйлдэл хийдэг кодын хэсэг юм. Өөрийн функц үүсгэвэл давтагдсан кодыг нэг бичээд олон удаа ашиглаж болно.
 
-Жишээ нь:
+**Функц үүсгэх:**
 
 ```python
 def say_hello():
-    print("Hello!")
+    player.speak("Hello!")
 ```
 
-Энэ код `say_hello` гэдэг нэртэй функц үүсгэж байна.
-
-Функцийг ажиллуулахын тулд нэрийг нь дуудаж бичнэ:
+**Функц дуудах:**
 
 ```python
 say_hello()
 ```
 
----
-
-## 2. Яагаад функц ашигладаг вэ?
-
-Функц ашигласнаар:
-
-- Код давтагдахгүй
-- Код илүү цэвэрхэн болно
-- Алдаа засахад амар болно
-- Нэг үйлдлийг олон удаа ашиглаж болно
-
-Жишээ:
-
-```python
-print("Move forward")
-print("Turn left")
-print("Move forward")
-print("Turn left")
-print("Move forward")
-print("Turn left")
-print("Move forward")
-print("Turn left")
+**Гаралт:**
+```
+Hello!
 ```
 
-Үүнийг функцээр илүү цэвэрхэн бичиж болно:
+| Ойлголт | Тайлбар | Жишээ |
+| --- | --- | --- |
+| `def` | Функц тодорхойлох түлхүүр үг. | `def say_hello():` |
+| Function body | Функцийн доторх код. | `    player.speak("Hello!")` |
+| Дуудах | Функцийг ажиллуулах. | `say_hello()` |
 
-```python
-def make_square():
-    print("Move forward")
-    print("Turn left")
-    print("Move forward")
-    print("Turn left")
-    print("Move forward")
-    print("Turn left")
-    print("Move forward")
-    print("Turn left")
-
-make_square()
-```
+> **Гол санаа:**
+> `def` = define (тодорхойлох). Функцийн нэрийг өөрөө сонгож болно.
 
 ---
 
-## 3. Function бичих бүтэц
+# Алхам 2: Аргумент ашиглах (Мэдээлэл дамжуулах)
 
-Функц бичих үндсэн бүтэц:
-
-```python
-def function_name():
-    # энд хийх үйлдлүүд бичигдэнэ
-```
-
-Анхаарах зүйлс:
-
-- `def` гэдэг нь function үүсгэх түлхүүр үг
-- Function нэрний дараа `()` бичнэ
-- Мөрийн төгсгөлд `:` тавина
-- Доторх код заавал зайтай буюу indentation-тэй байна
-
----
-
-## 4. Энгийн жишээ
+Функцэд гаднаас утга дамжуулж, илүү уян хатан болгох.
 
 ```python
-def greet():
-    print("Сайн байна уу?")
-    print("Python хичээлдээ тавтай морил!")
+def greet(name):
+    player.speak("Hello " + name)
 
-greet()
+greet("Alice")
+greet("Bob")
 ```
 
-Гаралт:
-
-```text
-Сайн байна уу?
-Python хичээлдээ тавтай морил!
+**Гаралт:**
+```
+Hello Alice
+Hello Bob
 ```
 
----
-
-## 5. Function-г олон удаа дуудах
-
-```python
-def jump():
-    print("Jump!")
-
-jump()
-jump()
-jump()
-```
-
-Гаралт:
-
-```text
-Jump!
-Jump!
-Jump!
-```
-
----
-
-## 6. Parameter-тэй function
-
-Заримдаа функцэд мэдээлэл дамжуулж болно. Үүнийг **parameter** гэдэг.
-
-```python
-def greet_name(name):
-    print("Сайн уу, " + name)
-
-greet_name("Болд")
-greet_name("Саруул")
-```
-
-Гаралт:
-
-```text
-Сайн уу, Болд
-Сайн уу, Саруул
-```
-
----
-
-## 7. Тоо ашигласан жишээ
+**Олон аргумент:**
 
 ```python
 def add_numbers(a, b):
-    print(a + b)
+    result = a + b
+    player.speak(result)
 
-add_numbers(5, 3)
-add_numbers(10, 20)
+add_numbers(3, 5)
 ```
 
-Гаралт:
-
-```text
+**Гаралт:**
+```
 8
-30
 ```
+
+| Код | Юу хийдэг вэ? |
+| --- | --- |
+| `def greet(name):` | `name` аргумент хүлээн авна. |
+| `greet("Alice")` | "Alice" гэсэн утга дамжуулна. |
+| `def add(a, b):` | Хоёр аргумент хүлээн авна. |
 
 ---
 
-## 8. Return гэж юу вэ?
+# Алхам 3: Return ашиглах (Үр дүн буцаах)
 
-`return` нь функцээс хариу утга буцаахад ашиглагдана.
+Функцээс үр дүнг буцааж, дараа нь ашиглах.
 
 ```python
-def add(a, b):
-    return a + b
+def add_numbers(num1, num2):
+    return(num1 + num2)
 
-result = add(4, 6)
-print(result)
+result = add_numbers(3, 5)
+player.speak(result)
 ```
 
-Гаралт:
-
-```text
-10
+**Гаралт:**
+```
+8
 ```
 
-`print()` нь зөвхөн дэлгэц дээр харуулна.  
-`return` нь утгыг буцааж өгдөг тул дараа нь дахин ашиглаж болно.
+**Яагаад return хэрэгтэй вэ?**
+
+- Функцээс тооцооны үр дүнг авч, дараа нь ашиглах
+- Өгөгдөл боловсруулж, шинэ утга үүсгэх
+
+```python
+def calculate_area(width, height):
+    return(width * height)
+
+area = calculate_area(4, 5)
+player.speak(area)  # 20
+```
+
+> **Анхаарах:**
+> `return` функцийн дотор бичигдэнэ. Гадна бичвэл алдаа гарна.
 
 ---
 
-## 9. Game-based coding жишээ
+# Алхам 4: Функц дотор давталт ба нөхцөл
 
-Доорх жишээ нь тоглоомын дүрийг хөдөлгөж байна гэж төсөөлье.
+Функц дотор бүх зүйлийг хослуулж болно.
 
-```python
-import player
-
-def move_two_steps():
-    player.move_forward()
-    player.move_forward()
-
-move_two_steps()
-```
-
----
-
-## 10. Давтагдсан хөдөлгөөнийг function болгох
-
-Function ашиглаагүй хувилбар:
+**Давталт ашиглах:**
 
 ```python
-import player
-
-player.move_forward()
-player.turn_left()
-player.move_forward()
-player.turn_left()
-player.move_forward()
-player.turn_left()
-player.move_forward()
-player.turn_left()
-```
-
-Function ашигласан хувилбар:
-
-```python
-import player
-
-def make_square():
-    player.move_forward()
-    player.turn_left()
-    player.move_forward()
-    player.turn_left()
-    player.move_forward()
-    player.turn_left()
-    player.move_forward()
-    player.turn_left()
-
-make_square()
-```
-
----
-
-## 11. Дасгал 1
-
-Доорх функц юу хийх вэ?
-
-```python
-def say_python():
-    print("I love Python!")
-
-say_python()
-say_python()
-```
-
-### Хариулт
-
-```text
-I love Python!
-I love Python!
-```
-
----
-
-## 12. Дасгал 2
-
-`move_three_steps()` нэртэй функц үүсгээд дүрийг 3 алхам урагш явуул.
-
-### Жишээ хариу
-
-```python
-import player
-
-def move_three_steps():
-    player.move_forward()
-    player.move_forward()
-    player.move_forward()
-
-move_three_steps()
-```
-
----
-
-## 13. Дасгал 3
-
-`turn_around()` нэртэй функц үүсгээд дүрийг 180 градус эргүүл.
-
-### Жишээ хариу
-
-```python
-import player
-
-def turn_around():
-    player.turn_left()
-    player.turn_left()
-
-turn_around()
-```
-
----
-
-## 14. Дасгал 4
-
-Parameter ашиглан сурагчийн нэрээр мэндчилдэг функц бич.
-
-### Жишээ хариу
-
-```python
-def hello_student(name):
-    print("Сайн уу, " + name)
-
-hello_student("Тэмүүлэн")
-hello_student("Ану")
-```
-
----
-
-## 15. Дасгал 5
-
-Хоёр тоог үржүүлээд хариуг буцаадаг функц бич.
-
-### Жишээ хариу
-
-```python
-def multiply(a, b):
-    return a * b
-
-answer = multiply(6, 7)
-print(answer)
-```
-
-Гаралт:
-
-```text
-42
-```
-
----
-
-## 16. Mini Project
-
-### Даалгавар
-Тоглоомын дүрд зориулж дараах функцуудыг бич:
-
-- `move_two_steps()`
-- `turn_around()`
-- `make_square()`
-
-### Жишээ код
-
-```python
-import player
-
-def move_two_steps():
-    player.move_forward()
-    player.move_forward()
-
-def turn_around():
-    player.turn_left()
-    player.turn_left()
-
-def make_square():
-    for i in range(4):
+def move_forward_times(count):
+    for x in range(count):
         player.move_forward()
-        player.turn_left()
 
-move_two_steps()
-turn_around()
-make_square()
+move_forward_times(3)
+```
+
+**Нөхцөл ашиглах:**
+
+```python
+def check_door(action):
+    if action == "open":
+        player.open()
+    else:
+        player.close()
+
+check_door("open")
+```
+
+**Жагсаалт ашиглах:**
+
+```python
+def process_items(items):
+    for item in items:
+        player.place(item)
+
+fruits = ["apple", "banana"]
+process_items(fruits)
 ```
 
 ---
 
-## 17. Түгээмэл алдаа
+# Алхам 5: Тоглоомын түвшинд хэрэглэх
 
-### Алдаа 1: `:` мартах
+**Level 1: Creating a Function**
 
-Буруу:
-
-```python
-def hello()
-    print("Hello")
-```
-
-Зөв:
+Чулуу түлхэж урагшлах давтагдсан үйлдлийг `repeat_push()` функц болгоно.
 
 ```python
-def hello():
-    print("Hello")
+def repeat_push():
+    player.push()
+    player.move_forward()
+
+repeat_push()
+repeat_push()
 ```
+
+**Level 2: Function Arguments**
+
+Аргумент ашиглан хэдэн удаа давтахыг функцэд дамжуулна.
+
+```python
+def water_crops(count):
+    for x in range(count):
+        player.water()
+
+water_crops(5)
+```
+
+**Level 3: Return**
+
+`return` ашиглан тооцооны үр дүн буцаана.
+
+```python
+def count_items(items):
+    return(len(items))
+
+total = count_items(["a", "b", "c"])
+player.speak(total)  # 3
+```
+
+**Level 4-6: Complex Functions**
+
+Жагсаалт, нөхцөл, операторуудыг функц дотор хослуулна.
+
+```python
+def process_fruits(fruits):
+    if len(fruits) >= 5:
+        player.speak("Enough fruits")
+        return(True)
+    else:
+        player.speak("Need more")
+        return(False)
+```
+
+**Нийтлэг алдаа (Анхаарах зүйлс):**
+
+| Алдаа | Яагаад буруу вэ? | Зөв хэлбэр |
+| --- | --- | --- |
+| `def repeat_push()` | `:` тэмдэг дутуу. | `def repeat_push():` |
+| `repeat_push` | Функцийг дуудахад `()` хэрэгтэй. | `repeat_push()` |
+| `def water_crops(count)` | `:` тэмдэг дутуу. | `def water_crops(count):` |
+| `return` гадна бичих | `return` функцийн дотор байх ёстой. | `    return(num1 + num2)` |
 
 ---
 
-### Алдаа 2: Indentation хийхгүй байх
+# Quiz: Өөрийгөө шалгаарай
 
-Буруу:
+## Асуулт 1
+`def` ямар үүрэгтэй вэ?
+
+- А) Функц устгана
+- Б) Функц тодорхойлоно
+- В) Хувьсагч үүсгэнэ
+- Г) Жагсаалт үүсгэнэ
+
+**Зөв хариулт:** Б
+**Тайлбар:** `def` нь "define" гэсэн үг бөгөөд шинэ функц тодорхойлоход ашиглагддаг.
+
+## Асуулт 2
+Функц дуудна гэдэг юу гэсэн үг вэ?
+
+- А) Функц устгана
+- Б) Функцийг ажиллуулна
+- В) Функцийн нэрийг өөрчилнө
+- Г) Функц бичнэ
+
+**Зөв хариулт:** Б
+**Тайлбар:** Функц дуудах нь тэр функц доторх кодыг ажиллуулахыг хэлнэ.
+
+## Асуулт 3
+Аргумент яагаад хэрэгтэй вэ?
+
+- А) Функц устгахын тулд
+- Б) Функцэд мэдээлэл дамжуулахын тулд
+- В) Кодыг удаашруулахын тулд
+- Г) Алдаа гаргахын тулд
+
+**Зөв хариулт:** Б
+**Тайлбар:** Аргумент нь функцэд гаднаас утга дамжуулж, илүү уян хатан болгодог.
+
+## Асуулт 4
+`return` ямар үед ашиглагддаг вэ?
+
+- А) Функц дуудах үед
+- Б) Функцээс үр дүн буцаах үед
+- В) Функц устгах үед
+- Г) Код бичих үед
+
+**Зөв хариулт:** Б
+**Тайлбар:** `return` нь функцээс тооцооны үр дүнг буцааж, дараа нь ашиглах боломж олгодог.
+
+## Асуулт 5
+Функц ашиглах нь кодыг яаж богиносгодог вэ?
+
+- А) Код илүү урт болно
+- Б) Давтагдсан кодыг нэг бичээд олон удаа дуудна
+- В) Код илүү удаан ажиллана
+- Г) Алдаа илүү гарна
+
+**Зөв хариулт:** Б
+**Тайлбар:** Нэг удаа функц тодорхойлоод, олон удаа дуудвал давтагдсан код бичих шаардлагагүй.
+
+## Асуулт 6
+Дараах кодны гаралтыг ол.
 
 ```python
-def hello():
-print("Hello")
+def greet(name):
+    player.speak("Hi " + name)
+
+greet("Tom")
 ```
 
-Зөв:
+- А) Hi
+- Б) Hi Tom
+- В) name
+- Г) Алдаа гарна
 
-```python
-def hello():
-    print("Hello")
-```
+**Зөв хариулт:** Б
+**Тайлбар:** `greet("Tom")` дуудахад `name` аргумент "Tom" утга авна. "Hi Tom" гэж хэвлэнэ.
 
 ---
 
-### Алдаа 3: Function-г дуудахгүй байх
+# Дүгнэлт
 
-```python
-def hello():
-    print("Hello")
-```
+Энэ бүлэгт чи:
 
-Энэ код функц үүсгэсэн боловч ажиллуулахгүй.  
-Ажиллуулахын тулд ингэж дуудна:
-
-```python
-hello()
-```
-
----
-
-## 18. Богино Quiz
-
-### 1. Function үүсгэхэд ямар түлхүүр үг ашигладаг вэ?
-
-A. function  
-B. def  
-C. make  
-D. start  
-
-**Хариулт: B. def**
-
----
-
-### 2. Function-г ажиллуулахыг юу гэж хэлдэг вэ?
-
-A. Дуудах  
-B. Устгах  
-C. Хадгалах  
-D. Зурах  
-
-**Хариулт: A. Дуудах**
-
----
-
-### 3. Доорх код хэдэн удаа `Hello` хэвлэх вэ?
-
-```python
-def hello():
-    print("Hello")
-
-hello()
-hello()
-hello()
-```
-
-A. 1  
-B. 2  
-C. 3  
-D. 0  
-
-**Хариулт: C. 3**
-
----
-
-## 19. Дүгнэлт
-
-Өнөөдрийн хичээлээр бид:
-
-- Function гэж юу болохыг сурлаа
-- `def` ашиглан function үүсгэлээ
-- Function-г дуудаж ажиллууллаа
-- Parameter болон return-ийн үндсийг үзлээ
-- Давтагдсан кодыг function болгож цэвэрхэн бичиж сурлаа
-
----
-
-## Гэрийн даалгавар
-
-Дараах 3 function-г өөрөө бич:
-
-1. `say_my_name(name)`
-2. `add_three_numbers(a, b, c)`
-3. `move_and_turn()`
-
-Жишээ:
-
-```python
-def say_my_name(name):
-    print("My name is " + name)
-```
-
-## Түвшин бүрийн тайлбар
-
-### Level 1: Creating a Function
-
-Зорилго: 22-оос илүүгүй мөр код бичиж, чулуунуудыг түлхэж гарц руу хүр.
-
-Гол санаа: Чулуу түлхэж урагшлах давтагдсан үйлдлийг `repeat_push()` функц болгоно.
-
-### Level 2: Function Arguments
-
-Зорилго: 13-аас илүүгүй мөр кодоор захиалгат функц ашиглан талбайн бүх ургацыг усал.
-
-Гол санаа: Аргумент ашиглан хэдэн удаа давтахыг функцэд дамжуулна.
-
-### Level 3: Passing Functions as Arguments
-
-Зорилго: Функц ашиглан намгийн mandrake болон мөөгнүүдийг тоол.
-
-Гол санаа: `return` ашиглан өгүүлбэр эсвэл тооцооны үр дүн буцаана.
-
-### Level 4: Using Lists in Functions
-
-Зорилго: Талбайн бүх ногоог цуглуулж, захиалгат функц ашиглан даршилж хадгал.
-
-Гол санаа: Жагсаалтуудыг функцэд дамжуулж, олон төрлийн ногоог боловсруулахад ашиглана.
-
-### Level 5: Using Conditions in Functions
-
-Зорилго: Нэг захиалгат функцэд нөхцөлүүдийг ашиглан хаалгыг нээж, гүүрнүүдийг засаарай.
-
-Гол санаа: Функц дотор `if` ашиглан `open` эсвэл `build` үйлдлийг сонгоно.
-
-### Level 6: Using Operators in Functions
-
-Зорилго: Бүх жимсийг цуглуулж, захиалгат функц дотор операторуудыг ашиглан хангалттай жимс байгаа эсэхийг шалга.
-
-Гол санаа: Оператор ашиглан хангалттай жимс байгаа эсэхийг функц дотор шалгана.
-
-## Дасгал
-
-1. `def move_twice():` функц үүсгээд хоёр удаа урагшлуул.
-2. `def say_word(word):` функц үүсгээд `player.speak(word)` ажиллуул.
-3. `def add(a, b):` функцээс нийлбэр буцаа.
-4. Функц дотор `if action == "open":` нөхцөл бичиж турш.
-
-## Өөрийгөө шалгах асуултууд
-
-1. `def` ямар үүрэгтэй вэ?
-2. Функц дуудна гэдэг юу гэсэн үг вэ?
-3. Аргумент яагаад хэрэгтэй вэ?
-4. `return` ямар үед ашиглагддаг вэ?
-5. Функц ашиглах нь кодыг яаж богиносгодог вэ?
-
-## Санах гол санаа
+1. `def` ашиглан өөрийн функц үүсгэхийг сурлаа
+2. Функцэд аргумент дамжуулахыг сурлаа
+3. `return` ашиглан үр дүн буцаахыг сурлаа
+4. Функц дотор давталт, нөхцөл ашиглахыг сурлаа
+5. Жагсаалтыг функцэд дамжуулахыг сурлаа
+6. Функцийг дахин ашиглах давуу талыг ойлголоо
 
 Өөрийн функц нь давтагдсан логикийг нэг нэртэй болгож, олон удаа найдвартай ашиглах боломж өгдөг.
+
+---
+
+# Гол санаа
+
+- `def` = функц тодорхойлох
+- Аргумент = функцэд мэдээлэл дамжуулах
+- `return` = үр дүн буцаах
+- Функц дотор бүх зүйлийг хослуулж болно
+- Нэг удаа бичээд олон удаа дуудна
+- `()` хаалт функцийг дуудахад заавал хэрэгтэй
+
+---
+
+# Гэрийн даалгавар
+
+## Даалгавар 1: Функц үүсгэх
+
+"Hello" гэж хэлдэг функц бич.
+
+```python
+# Энд кодоо бич
+def say_hello():
+    player.speak("Hello")
+
+say_hello()
+```
+
+## Даалгавар 2: Аргумент ашиглах
+
+Нэр хүлээн авч, мэндчилдэг функц бич.
+
+```python
+# Энд кодоо бич
+def greet(name):
+    player.speak("Hi " + name)
+
+greet("Alice")
+```
+
+## Даалгавар 3: Return ашиглах
+
+Хоёр тоо нэмж, үр дүнг буцаадаг функц бич.
+
+```python
+# Энд кодоо бич
+def add(a, b):
+    return(a + b)
+
+result = add(3, 5)
+player.speak(result)
+```
