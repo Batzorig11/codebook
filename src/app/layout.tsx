@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import Header from "@/components/Header";
+import { LangProvider } from "@/context/LangContext";
 import "./globals.css";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
@@ -57,8 +58,10 @@ export default function RootLayout({
             gtag('config', 'G-XNZ1PXD3Y9');
           `}
         </Script>
-        <Header />
-        {children}
+        <LangProvider>
+          <Header />
+          {children}
+        </LangProvider>
       </body>
     </html>
   );

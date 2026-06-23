@@ -21,7 +21,6 @@ function getGuidePath(chapter: number) {
 } // /my-project/lectures/chapter-8-student-guide-mn.md - ene hesgiin bn
 
 function getTitle(markdown: string, chapter: number) {
-  console.log("markdown", markdown);
   
   const title = markdown
     .split("\n")

@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -9,72 +11,111 @@ import {
   Rocket02Icon,
   SchoolIcon,
 } from "@hugeicons/core-free-icons";
+import { useLang } from "@/context/LangContext";
 
 const chapters = [
   {
     number: "01",
-    title: "Python эхлэл",
-    summary: "Команд, функц, дараалал",
+    title: { mn: "Python эхлэл", en: "Python Basics" },
+    summary: { mn: "Команд, функц, дараалал", en: "Commands, functions, sequence" },
     color: "bg-[#ffdf6e]",
   },
   {
     number: "02",
-    title: "Хувьсагч",
-    summary: "Тоон ба текст утга",
+    title: { mn: "Хувьсагч", en: "Variables" },
+    summary: { mn: "Тоон ба текст утга", en: "Number and text values" },
     color: "bg-[#7dd3fc]",
   },
   {
     number: "03",
-    title: "Оператор",
-    summary: "Нэмэх, хасах, тооцоолох",
+    title: { mn: "Оператор", en: "Operators" },
+    summary: { mn: "Нэмэх, хасах, тооцоолох", en: "Addition, subtraction, calculation" },
     color: "bg-[#86efac]",
   },
   {
     number: "04",
-    title: "Давталт",
-    summary: "For, while, range",
+    title: { mn: "Давталт", en: "Loops" },
+    summary: { mn: "For, while, range", en: "For, while, range" },
     color: "bg-[#fca5a5]",
   },
   {
     number: "05",
-    title: "Жагсаалт",
-    summary: "Олон утгыг хадгалах",
+    title: { mn: "Жагсаалт", en: "Lists" },
+    summary: { mn: "Олон утгыг хадгалах", en: "Storing multiple values" },
     color: "bg-[#c4b5fd]",
   },
   {
     number: "06",
-    title: "Нөхцөл",
-    summary: "If ашиглан шийдэх",
+    title: { mn: "Нөхцөл", en: "Conditions" },
+    summary: { mn: "If ашиглан шийдэх", en: "Making decisions with if" },
     color: "bg-[#f9a8d4]",
   },
   {
     number: "07",
-    title: "Функц",
-    summary: "Өөрийн команд үүсгэх",
+    title: { mn: "Функц", en: "Functions" },
+    summary: { mn: "Өөрийн команд үүсгэх", en: "Creating your own commands" },
     color: "bg-[#67e8f9]",
   },
   {
     number: "08",
-    title: "Dictionary",
-    summary: "Key ба value",
+    title: { mn: "Dictionary", en: "Dictionary" },
+    summary: { mn: "Key ба value", en: "Key and value" },
     color: "bg-[#fdba74]",
   },
   {
     number: "09",
-    title: "Class",
-    summary: "Object бүтээх",
+    title: { mn: "Class", en: "Class" },
+    summary: { mn: "Object бүтээх", en: "Building objects" },
     color: "bg-[#bef264]",
   },
 ];
 
+const LABELS = {
+  mn: {
+    bannerAlt: "CodingForKids тоглоомын өнгөлөг ертөнц",
+    heroSubtitle:
+      "Python-ийг тоглоомын даалгавраар ойлгож, бүлэг бүрийн кодыг алхам алхмаар судлаарай.",
+    chooseChapter: "Бүлгээ сонгох",
+    openCodebook: "Codebook нээх",
+    studentGuides: "Сурагчийн гарын авлага",
+    chaptersLabel: "9 бүлэг",
+    sectionTitle: "Сурах замаа сонго",
+    sectionSubtitle: "Эхний бүлгээс эхлээд дараагийн түвшин рүү тайван ахина.",
+    start: "Эхлэх",
+    studentMarkdown: "Сурагчийн Markdown",
+    studentGuidesTitle: "Сурагчийн гарын авлага",
+    viewAll: "Бүгдийг харах",
+    footerText: (year: number) => `© ${year} erxes. Created by Batzorig.`,
+  },
+  en: {
+    bannerAlt: "CodingForKids game world",
+    heroSubtitle:
+      "Learn Python through game challenges and explore each chapter's code step by step.",
+    chooseChapter: "Choose a Chapter",
+    openCodebook: "Open Codebook",
+    studentGuides: "Student Guides",
+    chaptersLabel: "9 chapters",
+    sectionTitle: "Choose Your Path",
+    sectionSubtitle: "Start from the first chapter and advance to the next level at your own pace.",
+    start: "Start",
+    studentMarkdown: "Student Markdown",
+    studentGuidesTitle: "Student Guides",
+    viewAll: "View All",
+    footerText: (year: number) => `© ${year} erxes. Created by Batzorig.`,
+  },
+} as const;
+
 export default function Home() {
+  const { lang } = useLang();
+  const L = LABELS[lang];
+
   return (
     <>
       <main className="min-h-screen">
         <section className="relative isolate min-h-[calc(100vh-4rem)] overflow-hidden">
           <Image
             src="/banner.png"
-            alt="CodingForKids тоглоомын өнгөлөг ертөнц"
+            alt={L.bannerAlt}
             fill
             priority
             sizes="100vw"
@@ -85,19 +126,14 @@ export default function Home() {
           <div className="relative mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl flex-col justify-center px-4 pb-20 pt-12 sm:px-6 lg:px-8">
             <div className="max-w-3xl text-white">
               <div className="mb-5 inline-flex items-center gap-2 rounded-lg bg-white/90 px-3 py-2 text-sm font-bold text-[#17324d] shadow-sm">
-                <HugeiconsIcon
-                  icon={GameController03Icon}
-                  size={20}
-                  strokeWidth={2}
-                />
+                <HugeiconsIcon icon={GameController03Icon} size={20} strokeWidth={2} />
                 CodingForKids
               </div>
               <h1 className="font-pixel text-4xl leading-tight text-white drop-shadow sm:text-5xl lg:text-6xl">
                 Kami Codebook
               </h1>
               <p className="mt-6 max-w-2xl text-lg font-semibold leading-8 text-white sm:text-xl">
-                Python-ийг тоглоомын даалгавраар ойлгож, бүлэг бүрийн кодыг
-                алхам алхмаар судлаарай.
+                {L.heroSubtitle}
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -105,36 +141,23 @@ export default function Home() {
                   href="#chapters"
                   className="kid-focus inline-flex items-center justify-center gap-2 rounded-lg bg-[#ffd54f] px-5 py-4 text-base font-black text-[#17324d] shadow-lg shadow-black/20 transition hover:-translate-y-0.5 hover:bg-[#ffe27a]"
                 >
-                  <HugeiconsIcon
-                    icon={Rocket02Icon}
-                    size={22}
-                    strokeWidth={2.2}
-                  />
-                  Бүлгээ сонгох
+                  <HugeiconsIcon icon={Rocket02Icon} size={22} strokeWidth={2.2} />
+                  {L.chooseChapter}
                 </Link>
                 <Link
                   href="/codebook"
                   className="kid-focus inline-flex items-center justify-center gap-2 rounded-lg border-2 border-white bg-white/12 px-5 py-4 text-base font-black text-white backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/22"
                 >
-                  <HugeiconsIcon
-                    icon={BookOpen01Icon}
-                    size={22}
-                    strokeWidth={2.2}
-                  />
-                  Codebook нээх
+                  <HugeiconsIcon icon={BookOpen01Icon} size={22} strokeWidth={2.2} />
+                  {L.openCodebook}
                 </Link>
                 <Link
                   href="/student-guides"
                   className="kid-focus inline-flex items-center justify-center gap-2 rounded-lg border-2 border-white bg-white/12 px-5 py-4 text-base font-black text-white backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/22"
                 >
-                  <HugeiconsIcon
-                    icon={SchoolIcon}
-                    size={22}
-                    strokeWidth={2.2}
-                  />
-                  Сурагчийн гарын авлага
+                  <HugeiconsIcon icon={SchoolIcon} size={22} strokeWidth={2.2} />
+                  {L.studentGuides}
                 </Link>
-               
               </div>
             </div>
           </div>
@@ -145,15 +168,15 @@ export default function Home() {
             <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="mb-2 inline-flex items-center gap-2 rounded-lg bg-[#dcfce7] px-3 py-1 text-sm font-black text-[#166534]">
-                  <HugeiconsIcon icon={CodeIcon} size={18} strokeWidth={2} />9
-                  бүлэг
+                  <HugeiconsIcon icon={CodeIcon} size={18} strokeWidth={2} />
+                  {L.chaptersLabel}
                 </p>
                 <h2 className="text-3xl font-black tracking-tight text-[#17324d] dark:text-[#e7f7ff] sm:text-4xl">
-                  Сурах замаа сонго
+                  {L.sectionTitle}
                 </h2>
               </div>
               <p className="max-w-xl text-base font-semibold leading-7 text-[#48647d] dark:text-[#b8d7e8]">
-                Эхний бүлгээс эхлээд дараагийн түвшин рүү тайван ахина.
+                {L.sectionSubtitle}
               </p>
             </div>
 
@@ -165,29 +188,23 @@ export default function Home() {
                   className="kid-focus group grid min-h-[172px] grid-rows-[auto_1fr_auto] rounded-lg border-2 border-[#17324d]/10 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-[#17324d]/25 hover:shadow-xl dark:border-white/10 dark:bg-[#0f2742] dark:hover:border-[#38bdf8]/70"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <span
-                      className={`rounded-lg px-3 py-2 font-pixel text-sm text-[#17324d] ${chapter.color}`}
-                    >
+                    <span className={`rounded-lg px-3 py-2 font-pixel text-sm text-[#17324d] ${chapter.color}`}>
                       {chapter.number}
                     </span>
                     <span className="rounded-lg bg-[#f1f5f9] p-2 text-[#17324d] transition group-hover:bg-[#17324d] group-hover:text-white dark:bg-[#10243a] dark:text-[#e7f7ff] dark:group-hover:bg-[#ffd54f] dark:group-hover:text-[#17324d]">
-                      <HugeiconsIcon
-                        icon={ArrowRight02Icon}
-                        size={20}
-                        strokeWidth={2.2}
-                      />
+                      <HugeiconsIcon icon={ArrowRight02Icon} size={20} strokeWidth={2.2} />
                     </span>
                   </div>
                   <div className="mt-5">
                     <h3 className="text-2xl font-black text-[#17324d] dark:text-[#e7f7ff]">
-                      {chapter.title}
+                      {chapter.title[lang]}
                     </h3>
                     <p className="mt-2 text-base font-semibold text-[#5b7086] dark:text-[#b8d7e8]">
-                      {chapter.summary}
+                      {chapter.summary[lang]}
                     </p>
                   </div>
                   <p className="mt-5 text-sm font-black uppercase tracking-wide text-[#0f766e] dark:text-[#67e8f9]">
-                    Эхлэх
+                    {L.start}
                   </p>
                 </Link>
               ))}
@@ -201,22 +218,18 @@ export default function Home() {
               <div>
                 <p className="mb-2 inline-flex items-center gap-2 rounded-lg bg-[#e0f2fe] px-3 py-1 text-sm font-black text-[#075985]">
                   <HugeiconsIcon icon={SchoolIcon} size={18} strokeWidth={2} />
-                  Сурагчийн Markdown
+                  {L.studentMarkdown}
                 </p>
                 <h2 className="text-3xl font-black tracking-tight text-[#17324d] dark:text-[#e7f7ff] sm:text-4xl">
-                  Сурагчийн гарын авлага
+                  {L.studentGuidesTitle}
                 </h2>
               </div>
               <Link
                 href="/student-guides"
                 className="kid-focus inline-flex w-fit items-center justify-center gap-2 rounded-lg bg-[#17324d] px-5 py-3 text-sm font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#23527d] dark:bg-[#ffd54f] dark:text-[#17324d] dark:hover:bg-[#ffe27a]"
               >
-                Бүгдийг харах
-                <HugeiconsIcon
-                  icon={ArrowRight02Icon}
-                  size={18}
-                  strokeWidth={2.2}
-                />
+                {L.viewAll}
+                <HugeiconsIcon icon={ArrowRight02Icon} size={18} strokeWidth={2.2} />
               </Link>
             </div>
 
@@ -227,14 +240,12 @@ export default function Home() {
                   href={`/student-guides/chapter-${index + 1}`}
                   className="kid-focus group flex items-center gap-4 rounded-lg border-2 border-[#17324d]/10 bg-[#f8fafc] p-4 transition hover:-translate-y-0.5 hover:border-[#38bdf8] hover:bg-white dark:border-white/10 dark:bg-[#10243a] dark:hover:border-[#38bdf8]/70 dark:hover:bg-[#132f4d]"
                 >
-                  <span
-                    className={`rounded-lg px-3 py-2 font-pixel text-sm text-[#17324d] ${chapter.color}`}
-                  >
+                  <span className={`rounded-lg px-3 py-2 font-pixel text-sm text-[#17324d] ${chapter.color}`}>
                     {chapter.number}
                   </span>
                   <div className="min-w-0 flex-1">
                     <h3 className="truncate text-lg font-black text-[#17324d] dark:text-[#e7f7ff]">
-                      {chapter.title}
+                      {chapter.title[lang]}
                     </h3>
                     <p className="truncate text-sm font-semibold text-[#64748b] dark:text-[#b8d7e8]">
                       chapter-{index + 1}-student-guide-mn.md
@@ -254,7 +265,7 @@ export default function Home() {
       </main>
 
       <footer className="border-t border-[#17324d]/10 bg-white/70 px-4 py-8 text-center text-sm font-semibold text-[#5b7086] dark:border-white/10 dark:bg-[#0b1f33]/80 dark:text-[#b8d7e8]">
-        &copy; {new Date().getFullYear()} erxes. Created by Batzorig.
+        {L.footerText(new Date().getFullYear())}
       </footer>
     </>
   );
