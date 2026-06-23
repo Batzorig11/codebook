@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useLang, type Lang } from "@/context/LangContext";
 import Link from "next/link";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -17,6 +18,90 @@ import {
   LeftToRightListNumberIcon,
   PencilEdit01Icon,
 } from "@hugeicons/core-free-icons";
+
+// ===== LABELS =====
+const LABELS = {
+  mn: {
+    backToGuides: "Гарын авлага руу буцах",
+    chapter: "БҮЛЭГ",
+    studyGuide: "Сурах бичиг",
+    step: "Алхам",
+    assessment: "Дүгнэлт",
+    steps: "Алхмууд",
+    keyPoints: "Гол санаа",
+    quickLinks: "Хурдан холбоос",
+    enterLevel: "Бүлгийн түвшинд орох",
+    viewCodebook: "Codebook харах",
+    noKeyPoints: "Гол санаа олдсонгүй",
+    prevChapter: "Өмнөх бүлэг",
+    nextChapter: "Дараагийн бүлэг",
+    chapterLabel: (n: number) => `Бүлэг ${n}`,
+    assessmentHomework: "Дүгнэлт & Даалгавар",
+    quizTitle: "Асуулт: Өөрийгөө шалгаарай",
+    question: "Асуулт",
+    correct: "Зөв!",
+    wrong: "Буруу!",
+    restart: "Дахин эхлэх",
+    congrats: "Баяр хүргэе!",
+    finished: "Дууслаа!",
+    scoreText: (score: number, total: number) =>
+      `Та ${score} / ${total} асуултад зөв хариуллаа!`,
+    nextQuestion: "Дараагийн асуулт →",
+    finish: "Дуусгах",
+    noQuestions: "Асуулт олдсонгүй",
+    copy: "Хуулах",
+    copied: "Хуулсан!",
+    tip: "Зөвлөмж",
+    warning: "Анхаарах",
+    important: "Чухал",
+    keyPoint: "Гол санаа",
+    conclusion: "Дүгнэлт",
+    homework: "Гэрийн даалгавар",
+    stepOf: (active: number, total: number) => `Алхам ${active} / ${total}`,
+    stepLabel: (n: number) => `Алхам ${n}`,
+    comingSoon: "Англи хэлний агуулга удахгүй нэмэгдэнэ.",
+  },
+  en: {
+    backToGuides: "Back to Guides",
+    chapter: "CHAPTER",
+    studyGuide: "Study Guide",
+    step: "Step",
+    assessment: "Assessment",
+    steps: "Steps",
+    keyPoints: "Key Points",
+    quickLinks: "Quick Links",
+    enterLevel: "Enter Chapter Level",
+    viewCodebook: "View Codebook",
+    noKeyPoints: "No key points found",
+    prevChapter: "Previous Chapter",
+    nextChapter: "Next Chapter",
+    chapterLabel: (n: number) => `Chapter ${n}`,
+    assessmentHomework: "Assessment & Homework",
+    quizTitle: "Quiz: Test Yourself",
+    question: "Question",
+    correct: "Correct!",
+    wrong: "Wrong!",
+    restart: "Restart",
+    congrats: "Congratulations!",
+    finished: "Finished!",
+    scoreText: (score: number, total: number) =>
+      `You answered ${score} / ${total} questions correctly!`,
+    nextQuestion: "Next Question →",
+    finish: "Finish",
+    noQuestions: "No questions found",
+    copy: "Copy",
+    copied: "Copied!",
+    tip: "Tip",
+    warning: "Warning",
+    important: "Important",
+    keyPoint: "Key Point",
+    conclusion: "Conclusion",
+    homework: "Homework",
+    stepOf: (active: number, total: number) => `Step ${active} / ${total}`,
+    stepLabel: (n: number) => `Step ${n}`,
+    comingSoon: "English content is coming soon.",
+  },
+} as const;
 
 const chapterColors = [
   { bg: "bg-[#ffdf6e]", text: "text-[#713f12]" },
@@ -49,6 +134,28 @@ interface QuizQuestion {
   options: { label: string; text: string }[];
   correctAnswer: string;
   explanation: string;
+}
+
+// ===== HELPERS =====
+function getStepTitle(title: string, index: number): string {
+  return title
+    .replace(`Алхам ${index + 1}: `, "")
+    .replace(`Step ${index + 1}: `, "")
+    .trim();
+}
+
+function parseInlineBold(text: string): React.ReactNode[] {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return (
+        <span key={i} className="font-black">
+          {part.slice(2, -2)}
+        </span>
+      );
+    }
+    return part;
+  });
 }
 
 // ===== MARKDOWN PARSER =====
@@ -213,12 +320,8 @@ function parseMarkdown(md: string): Section[] {
 // ===== EXTRACTION FUNCTIONS =====
 function extractTitle(md: string): string {
   const titleLine = md.split("\n").find((line) => line.startsWith("# "));
-  console.log("titleLine", titleLine);
-
-  return titleLine ? titleLine.replace(/^#\s*/, "").split(":")[1].trim() : "";
+  return titleLine ? titleLine.replace(/^#\s*/, "").split(":")[1]?.trim() ?? "" : "";
 }
-
-
 
 function extractHeroDescription(md: string): string {
   const lines = md.split("\n");
@@ -236,7 +339,7 @@ function extractKeyPoints(md: string): string[] {
   let inKeyPoints = false;
 
   for (const line of lines) {
-    if (line.match(/^#\s*Гол санаа/i)) {
+    if (line.match(/^#\s*(Гол санаа|Key Points)/i)) {
       inKeyPoints = true;
       continue;
     }
@@ -251,6 +354,13 @@ function extractKeyPoints(md: string): string[] {
   return points;
 }
 
+// Matches both Mongolian (А/Б/В/Г) and Latin (A/B/C/D) option letters
+const OPTION_RE = /^-\s*([АБВГабвгABCD])\)\s*(.+)/;
+const OPTION_LINE_RE = /^-\s*[АБВГабвгABCD]\)/;
+const CORRECT_RE = /^\*\*(Зөв хариулт|Correct answer):\*\*\s*([АБВГабвгABCD])/i;
+const EXPLAIN_RE = /^\*\*(Тайлбар|Explanation):\*\*\s*(.+)/i;
+const QUESTION_RE = /^##\s*(Асуулт|Question)\s*\d+/i;
+
 function extractQuizQuestions(md: string): QuizQuestion[] {
   const lines = md.split("\n");
   const questions: QuizQuestion[] = [];
@@ -258,9 +368,8 @@ function extractQuizQuestions(md: string): QuizQuestion[] {
 
   while (i < lines.length) {
     const line = lines[i];
-    const questionMatch = line.match(/^##\s*Асуулт\s*\d+/i);
 
-    if (questionMatch) {
+    if (QUESTION_RE.test(line)) {
       const question: QuizQuestion = {
         question: "",
         options: [],
@@ -269,9 +378,8 @@ function extractQuizQuestions(md: string): QuizQuestion[] {
       };
 
       i++;
-      // Read question text until options start
       const questionLines: string[] = [];
-      while (i < lines.length && !lines[i].match(/^-\s*[АБВГ]\)/)) {
+      while (i < lines.length && !OPTION_LINE_RE.test(lines[i])) {
         if (lines[i].trim()) {
           questionLines.push(lines[i].trim());
         }
@@ -279,9 +387,8 @@ function extractQuizQuestions(md: string): QuizQuestion[] {
       }
       question.question = questionLines.join(" ");
 
-      // Read options
-      while (i < lines.length && lines[i].match(/^-\s*[АБВГ]\)/)) {
-        const optionMatch = lines[i].match(/^-\s*([АБВГ])\)\s*(.+)/);
+      while (i < lines.length && OPTION_LINE_RE.test(lines[i])) {
+        const optionMatch = lines[i].match(OPTION_RE);
         if (optionMatch) {
           question.options.push({
             label: optionMatch[1],
@@ -291,22 +398,20 @@ function extractQuizQuestions(md: string): QuizQuestion[] {
         i++;
       }
 
-      // Read correct answer
       while (i < lines.length) {
-        const correctMatch = lines[i].match(/^\*\*Зөв хариулт:\*\*\s*([АБВГ])/i);
+        const correctMatch = lines[i].match(CORRECT_RE);
         if (correctMatch) {
-          question.correctAnswer = correctMatch[1];
+          question.correctAnswer = correctMatch[2];
           i++;
           break;
         }
         i++;
       }
 
-      // Read explanation
       while (i < lines.length) {
-        const explMatch = lines[i].match(/^\*\*Тайлбар:\*\*\s*(.+)/i);
+        const explMatch = lines[i].match(EXPLAIN_RE);
         if (explMatch) {
-          question.explanation = explMatch[1].trim();
+          question.explanation = explMatch[2].trim();
           i++;
           break;
         }
@@ -323,9 +428,17 @@ function extractQuizQuestions(md: string): QuizQuestion[] {
 }
 
 // ===== COMPONENTS =====
-
-function CodeTab({ code, language = "python" }: { code: string; language?: string }) {
+function CodeTab({
+  code,
+  language = "python",
+  lang,
+}: {
+  code: string;
+  language?: string;
+  lang: Lang;
+}) {
   const [copied, setCopied] = useState(false);
+  const L = LABELS[lang];
   const lines = code.split("\n");
 
   const handleCopy = async () => {
@@ -351,7 +464,7 @@ function CodeTab({ code, language = "python" }: { code: string; language?: strin
           className="inline-flex items-center gap-1.5 rounded-md bg-white/10 px-2.5 py-1.5 text-xs font-bold text-white/80 transition hover:bg-white/20 hover:text-white"
         >
           <span className="text-sm">{copied ? "✓" : "📋"}</span>
-          {copied ? "Хуулсан!" : "Хуулах"}
+          {copied ? L.copied : L.copy}
         </button>
       </div>
       <div className="overflow-x-auto p-4">
@@ -385,7 +498,7 @@ function MarkdownTable({ content }: { content: string }) {
     line
       .split("|")
       .filter((c) => c.trim())
-      .map((c) => c.trim())
+      .map((c) => c.trim()),
   );
 
   return (
@@ -431,7 +544,16 @@ function MarkdownTable({ content }: { content: string }) {
   );
 }
 
-function QuoteBlock({ content, variant = "tip" }: { content: string; variant?: QuoteVariant }) {
+function QuoteBlock({
+  content,
+  variant = "tip",
+  lang,
+}: {
+  content: string;
+  variant?: QuoteVariant;
+  lang: Lang;
+}) {
+  const L = LABELS[lang];
   const quoteStyles = {
     tip: {
       bg: "bg-gradient-to-r from-[#fefce8] to-[#fef9c3] dark:from-[#29220d] dark:to-[#3d3410]",
@@ -469,10 +591,10 @@ function QuoteBlock({ content, variant = "tip" }: { content: string; variant?: Q
       <div className="mb-2 flex items-center gap-2">
         <HugeiconsIcon icon={style.icon} size={20} strokeWidth={2} className={style.iconColor} />
         <span className={`text-sm font-black uppercase tracking-wide ${style.text}`}>
-          {variant === "tip" && "Зөвлөмж"}
-          {variant === "warning" && "Анхаарах"}
-          {variant === "important" && "Чухал"}
-          {variant === "key" && "Гол санаа"}
+          {variant === "tip" && L.tip}
+          {variant === "warning" && L.warning}
+          {variant === "important" && L.important}
+          {variant === "key" && L.keyPoint}
         </span>
       </div>
       <p className={`text-base font-semibold leading-7 ${style.text}`}>
@@ -482,22 +604,7 @@ function QuoteBlock({ content, variant = "tip" }: { content: string; variant?: Q
   );
 }
 
-// Helper to parse inline **bold** markdown
-function parseInlineBold(text: string): React.ReactNode[] {
-  const parts = text.split(/(\*\*.*?\*\*)/g);
-  return parts.map((part, i) => {
-    if (part.startsWith("**") && part.endsWith("**")) {
-      return (
-        <span key={i} className="font-black">
-          {part.slice(2, -2)}
-        </span>
-      );
-    }
-    return part;
-  });
-}
-
-function renderBlock(block: ContentBlock, index: number) {
+function renderBlock(block: ContentBlock, index: number, lang: Lang) {
   switch (block.type) {
     case "text":
       return (
@@ -518,11 +625,11 @@ function renderBlock(block: ContentBlock, index: number) {
         </h3>
       );
     case "code":
-      return <CodeTab key={index} code={block.content} language={block.language} />;
+      return <CodeTab key={index} code={block.content} language={block.language} lang={lang} />;
     case "table":
       return <MarkdownTable key={index} content={block.content} />;
     case "quote":
-      return <QuoteBlock key={index} content={block.content} variant={block.variant} />;
+      return <QuoteBlock key={index} content={block.content} variant={block.variant} lang={lang} />;
     case "spacer":
       return <div key={index} className="my-6" />;
     default:
@@ -531,19 +638,20 @@ function renderBlock(block: ContentBlock, index: number) {
 }
 
 // ===== QUIZ COMPONENT =====
-function QuizSection({ questions }: { questions: QuizQuestion[] }) {
+function QuizSection({ questions, lang }: { questions: QuizQuestion[]; lang: Lang }) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0);
   const [completed, setCompleted] = useState(false);
   const [shaking, setShaking] = useState(false);
+  const L = LABELS[lang];
 
   if (questions.length === 0) {
     return (
       <div className="rounded-2xl border-2 border-[#e2e8f0] bg-white p-6 shadow-lg dark:border-[#334155] dark:bg-[#0f2742]">
         <p className="text-center text-lg font-semibold text-[#64748b] dark:text-[#94a3b8]">
-          Асуулт олдсонгүй
+          {L.noQuestions}
         </p>
       </div>
     );
@@ -587,23 +695,29 @@ function QuizSection({ questions }: { questions: QuizQuestion[] }) {
   if (completed) {
     const allCorrect = score === questions.length;
     return (
-      <div className={`rounded-2xl border-2 p-8 text-center shadow-lg transition-all duration-500 ${
-        allCorrect 
-          ? "border-[#22c55e]/30 bg-gradient-to-br from-[#f0fdf4] to-[#dcfce7] dark:from-[#0f2917] dark:to-[#0d2917]"
-          : "border-[#f59e0b]/30 bg-gradient-to-br from-[#fffbeb] to-[#fef3c7] dark:from-[#29220d] dark:to-[#3d3410]"
-      }`}>
-        <h3 className={`mb-2 text-2xl font-black ${allCorrect ? "text-[#166534] dark:text-[#86efac]" : "text-[#92400e] dark:text-[#fcd34d]"}`}>
-          {allCorrect ? "Баяр хүргэе!" : "Дууслаа!"}
+      <div
+        className={`rounded-2xl border-2 p-8 text-center shadow-lg transition-all duration-500 ${
+          allCorrect
+            ? "border-[#22c55e]/30 bg-gradient-to-br from-[#f0fdf4] to-[#dcfce7] dark:from-[#0f2917] dark:to-[#0d2917]"
+            : "border-[#f59e0b]/30 bg-gradient-to-br from-[#fffbeb] to-[#fef3c7] dark:from-[#29220d] dark:to-[#3d3410]"
+        }`}
+      >
+        <h3
+          className={`mb-2 text-2xl font-black ${allCorrect ? "text-[#166534] dark:text-[#86efac]" : "text-[#92400e] dark:text-[#fcd34d]"}`}
+        >
+          {allCorrect ? L.congrats : L.finished}
         </h3>
-        <p className={`mb-6 text-lg font-semibold ${allCorrect ? "text-[#15803d] dark:text-[#86efac]" : "text-[#92400e] dark:text-[#fcd34d]"}`}>
-          Та {score} / {questions.length} асуултад зөв хариуллаа!
+        <p
+          className={`mb-6 text-lg font-semibold ${allCorrect ? "text-[#15803d] dark:text-[#86efac]" : "text-[#92400e] dark:text-[#fcd34d]"}`}
+        >
+          {L.scoreText(score, questions.length)}
         </p>
-        <div className="flex gap-3 justify-center">
+        <div className="flex justify-center gap-3">
           <button
             onClick={handleRestart}
             className="kid-focus rounded-xl bg-[#22c55e] px-6 py-3 text-sm font-black text-white transition hover:bg-[#16a34a] hover:shadow-lg hover:shadow-green-500/25"
           >
-            Дахин эхлэх
+            {L.restart}
           </button>
         </div>
       </div>
@@ -611,12 +725,14 @@ function QuizSection({ questions }: { questions: QuizQuestion[] }) {
   }
 
   return (
-    <div className={`rounded-2xl border-2 border-[#a855f7]/30 bg-white p-6 shadow-lg dark:border-[#a855f7]/20 dark:bg-[#0f2742] sm:p-8 ${shaking ? "animate-shake" : ""}`}>
+    <div
+      className={`rounded-2xl border-2 border-[#a855f7]/30 bg-white p-6 shadow-lg dark:border-[#a855f7]/20 dark:bg-[#0f2742] sm:p-8 ${shaking ? "animate-shake" : ""}`}
+    >
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="text-2xl">🎯</span>
           <h3 className="text-xl font-black text-[#17324d] dark:text-[#e7f7ff]">
-            Асуулт {currentQuestion + 1} / {questions.length}
+            {L.question} {currentQuestion + 1} / {questions.length}
           </h3>
         </div>
       </div>
@@ -661,9 +777,9 @@ function QuizSection({ questions }: { questions: QuizQuestion[] }) {
                 <span
                   className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-black transition-all ${
                     showCorrect
-                      ? "bg-[#22c55e] text-white scale-110"
+                      ? "scale-110 bg-[#22c55e] text-white"
                       : showWrong
-                        ? "bg-[#ef4444] text-white scale-110"
+                        ? "scale-110 bg-[#ef4444] text-white"
                         : isSelected
                           ? "bg-[#a855f7] text-white"
                           : "bg-[#f1f5f9] text-[#475569] dark:bg-[#1e293b] dark:text-[#94a3b8]"
@@ -689,23 +805,25 @@ function QuizSection({ questions }: { questions: QuizQuestion[] }) {
       </div>
 
       {showResult && (
-        <div className={`mt-4 rounded-xl p-4 transition-all duration-300 ${
-          isCorrect 
-            ? "bg-[#f0fdf4] dark:bg-[#0f2917]" 
-            : "bg-[#fef9c3] dark:bg-[#3d3410]"
-        }`}>
-          <p className={`text-sm font-bold ${
-            isCorrect 
-              ? "text-[#166534] dark:text-[#86efac]" 
-              : "text-[#713f12] dark:text-[#fde047]"
-          }`}>
-            {isCorrect ? "Зөв!" : "Буруу!"} {question.explanation}
+        <div
+          className={`mt-4 rounded-xl p-4 transition-all duration-300 ${
+            isCorrect ? "bg-[#f0fdf4] dark:bg-[#0f2917]" : "bg-[#fef9c3] dark:bg-[#3d3410]"
+          }`}
+        >
+          <p
+            className={`text-sm font-bold ${
+              isCorrect
+                ? "text-[#166534] dark:text-[#86efac]"
+                : "text-[#713f12] dark:text-[#fde047]"
+            }`}
+          >
+            {isCorrect ? L.correct : L.wrong} {question.explanation}
           </p>
           <button
             onClick={handleNext}
             className="kid-focus mt-3 rounded-lg bg-[#17324d] px-5 py-2.5 text-sm font-black text-white transition hover:bg-[#23527d] hover:shadow-lg dark:bg-[#ffd54f] dark:text-[#17324d] dark:hover:bg-[#ffe27a]"
           >
-            {currentQuestion < questions.length - 1 ? "Дараагийн асуулт →" : "Дуусгах"}
+            {currentQuestion < questions.length - 1 ? L.nextQuestion : L.finish}
           </button>
         </div>
       )}
@@ -721,6 +839,7 @@ function StepCard({
   onClick,
   icon,
   label,
+  lang,
 }: {
   step?: Section;
   index: number;
@@ -728,7 +847,9 @@ function StepCard({
   onClick: () => void;
   icon?: React.ReactNode;
   label?: string;
+  lang: Lang;
 }) {
+  const L = LABELS[lang];
   const stepColors = [
     "from-[#e0f2fe]/90 to-[#bae6fd]/90 dark:from-[#0d2a3d]/90 dark:to-[#10243a]/90",
     "from-[#fef3c7]/90 to-[#fde68a]/90 dark:from-[#3d3410]/90 dark:to-[#422e06]/90",
@@ -755,7 +876,9 @@ function StepCard({
     >
       <div className="flex items-center gap-3">
         {icon && (
-          <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${isLastTab && isActive ? 'bg-[#ef4444] text-white' : isActive ? 'bg-[#38bdf8] text-white' : 'bg-white/80 text-[#64748b] dark:bg-black/20 dark:text-[#94a3b8]'}`}>
+          <span
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${isLastTab && isActive ? "bg-[#ef4444] text-white" : isActive ? "bg-[#38bdf8] text-white" : "bg-white/80 text-[#64748b] dark:bg-black/20 dark:text-[#94a3b8]"}`}
+          >
             {icon}
           </span>
         )}
@@ -765,18 +888,24 @@ function StepCard({
           </span>
         )}
         <div>
-          <p className={`text-xs font-black uppercase tracking-wide ${isActive ? isLastTab ? "text-[#991b1b] dark:text-[#fca5a5]" : "text-[#17324d] dark:text-[#e7f7ff]" : "text-[#64748b] dark:text-[#94a3b8]"}`}>
-            {label || (step ? `Алхам ${index + 1}` : '')}
+          <p
+            className={`text-xs font-black uppercase tracking-wide ${isActive ? (isLastTab ? "text-[#991b1b] dark:text-[#fca5a5]" : "text-[#17324d] dark:text-[#e7f7ff]") : "text-[#64748b] dark:text-[#94a3b8]"}`}
+          >
+            {label || (step ? L.stepLabel(index + 1) : "")}
           </p>
           {step && (
-            <p className={`text-sm font-bold ${isActive ? isLastTab ? "text-[#7f1d1d] dark:text-[#fca5a5]" : "text-[#17324d] dark:text-[#e7f7ff]" : "text-[#475569] dark:text-[#b8d7e8]"}`}>
-              {step.title.replace(`Алхам ${index + 1}: `, "")}
+            <p
+              className={`text-sm font-bold ${isActive ? (isLastTab ? "text-[#7f1d1d] dark:text-[#fca5a5]" : "text-[#17324d] dark:text-[#e7f7ff]") : "text-[#475569] dark:text-[#b8d7e8]"}`}
+            >
+              {getStepTitle(step.title, index)}
             </p>
           )}
         </div>
       </div>
       {isActive && (
-        <div className={`absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r ${isLastTab ? 'from-[#ef4444] to-[#f87171]' : 'from-[#38bdf8] to-[#8b5cf6]'}`} />
+        <div
+          className={`absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r ${isLastTab ? "from-[#ef4444] to-[#f87171]" : "from-[#38bdf8] to-[#8b5cf6]"}`}
+        />
       )}
     </button>
   );
@@ -788,32 +917,42 @@ export default function StudentGuideContent({
   prevChapter,
   nextChapter,
   markdownContent,
+  markdownContentEn = "",
 }: {
   chapterNum: number;
   prevChapter: number | null;
   nextChapter: number | null;
   markdownContent: string;
+  markdownContentEn?: string;
 }) {
+  const { lang } = useLang();
   const color = chapterColors[(chapterNum - 1) % chapterColors.length];
-  const sections = parseMarkdown(markdownContent);
+
+  const enAvailable = markdownContentEn.trim().length > 0;
+  const activeMarkdown = lang === "en" && enAvailable ? markdownContentEn : markdownContent;
+  const L = LABELS[lang];
+
   const [activeStep, setActiveStep] = useState(0);
 
-  // Extract dynamic data
-  const chapterTitle = extractTitle(markdownContent);
-  const heroDescription = extractHeroDescription(markdownContent);
-  const keyPoints = extractKeyPoints(markdownContent);
-  const quizQuestions = extractQuizQuestions(markdownContent);
+  const sections = parseMarkdown(activeMarkdown);
+  const chapterTitle = extractTitle(activeMarkdown);
+  const heroDescription = extractHeroDescription(activeMarkdown);
+  const keyPoints = extractKeyPoints(activeMarkdown);
+  const quizQuestions = extractQuizQuestions(activeMarkdown);
 
-  // Separate sections
-  const stepSections = sections.filter((s) =>
-    s.title.match(/Алхам \d/)
+  const stepSections = sections.filter((s) => s.title.match(/^(Алхам|Step)\s*\d/));
+  const comparisonSection = sections.find(
+    (s) => s.title.includes("Сонголт") || s.title.includes("Comparison"),
   );
-
-  const comparisonSection = sections.find((s) => s.title.includes("Сонголт"));
-  console.log("Comparison Section:", comparisonSection);
-  
-  const homeworkSection = sections.find((s) => s.title.includes("Гэрийн") || s.title.includes("даалгавар"));
-  const conclusionSection = sections.find((s) => s.title.includes("Дүгнэлт"));
+  const homeworkSection = sections.find(
+    (s) =>
+      s.title.includes("Гэрийн") ||
+      s.title.includes("даалгавар") ||
+      s.title.includes("Homework"),
+  );
+  const conclusionSection = sections.find(
+    (s) => s.title.includes("Дүгнэлт") || s.title.includes("Conclusion"),
+  );
 
   const stepColors = [
     "from-[#e0f2fe] to-[#bae6fd] dark:from-[#0d2a3d] dark:to-[#10243a]",
@@ -823,7 +962,6 @@ export default function StudentGuideContent({
     "from-[#f3e8ff] to-[#e9d5ff] dark:from-[#2d1042] dark:to-[#34104d]",
   ];
 
-  // Check if we're on the final tab (index 5)
   const isFinalTab = activeStep === 5;
 
   return (
@@ -836,7 +974,7 @@ export default function StudentGuideContent({
             className="kid-focus inline-flex items-center gap-2 rounded-xl bg-white/90 px-5 py-3 text-sm font-black text-[#17324d] shadow-sm backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-md dark:bg-[#0f2742]/90 dark:text-[#e7f7ff] dark:hover:bg-[#0f2742]"
           >
             <HugeiconsIcon icon={ArrowLeft02Icon} size={18} strokeWidth={2.2} />
-            Гарын авлага руу буцах
+            {L.backToGuides}
           </Link>
         </div>
 
@@ -847,19 +985,17 @@ export default function StudentGuideContent({
 
           <div className="relative">
             <div className="mb-4 flex flex-wrap items-center gap-3">
-              <span
-                className={`rounded-xl px-4 py-2 text-sm font-black ${color.bg} ${color.text}`}
-              >
-                БҮЛЭГ {chapterNum}
+              <span className={`rounded-xl px-4 py-2 text-sm font-black ${color.bg} ${color.text}`}>
+                {L.chapter} {chapterNum}
               </span>
               <span className="rounded-xl bg-white/10 px-3 py-2 text-sm font-black text-white backdrop-blur-sm flex items-center gap-2">
                 <HugeiconsIcon icon={BookOpen01Icon} size={16} strokeWidth={2} />
-                Сурах бичиг
+                {L.studyGuide}
               </span>
             </div>
 
             <h1 className="text-4xl font-black tracking-tight text-white sm:text-6xl">
-              {chapterTitle || `Бүлэг ${chapterNum}`}
+              {chapterTitle || L.chapterLabel(chapterNum)}
             </h1>
             <p className="mt-4 max-w-2xl text-lg font-semibold leading-8 text-[#b8d7e8]">
               {heroDescription || "..."}
@@ -867,7 +1003,14 @@ export default function StudentGuideContent({
           </div>
         </section>
 
-        {/* Step Navigation - Horizontal with 6 tabs */}
+        {/* EN coming soon banner */}
+        {lang === "en" && !enAvailable && (
+          <div className="mb-6 rounded-2xl border-2 border-[#fbbf24]/40 bg-gradient-to-r from-[#fef9c3] to-[#fef3c7] px-6 py-4 text-[#92400e] font-semibold dark:border-[#fbbf24]/20 dark:bg-[#3d3410]/60 dark:text-[#fde047]">
+            🚧 {L.comingSoon}
+          </div>
+        )}
+
+        {/* Step Navigation */}
         <div className="mb-8 grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {stepSections.map((step, index) => (
             <StepCard
@@ -876,15 +1019,17 @@ export default function StudentGuideContent({
               index={index}
               isActive={activeStep === index}
               onClick={() => setActiveStep(index)}
+              lang={lang}
             />
           ))}
-          {/* 6th Tab - Final Assessment */}
+          {/* 6th Tab - Assessment */}
           <StepCard
             index={5}
             isActive={activeStep === 5}
             onClick={() => setActiveStep(5)}
             icon={<HugeiconsIcon icon={Target01Icon} size={20} strokeWidth={2} />}
-            label="Дүгнэлт"
+            label={L.assessment}
+            lang={lang}
           />
         </div>
 
@@ -892,7 +1037,7 @@ export default function StudentGuideContent({
         <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
           {/* Left: Content */}
           <div className="space-y-8">
-            {/* Steps 1-5: Show only the active step */}
+            {/* Steps 1-5 */}
             {!isFinalTab && stepSections[activeStep] && (
               <article
                 className={`relative overflow-hidden rounded-3xl border border-white/30 bg-gradient-to-br ${stepColors[activeStep]} p-6 shadow-xl backdrop-blur-2xl dark:border-white/10 sm:p-8`}
@@ -906,24 +1051,25 @@ export default function StudentGuideContent({
                     </span>
                     <div>
                       <p className="text-sm font-black uppercase tracking-wide text-[#64748b] dark:text-[#b8d7e8]">
-                        Алхам {activeStep + 1} / {stepSections.length}
+                        {L.stepOf(activeStep + 1, stepSections.length)}
                       </p>
                       <h2 className="text-2xl font-black text-[#17324d] dark:text-[#e7f7ff]">
-                        {stepSections[activeStep].title.replace(`Алхам ${activeStep + 1}: `, "")}
+                        {getStepTitle(stepSections[activeStep].title, activeStep)}
                       </h2>
                     </div>
                   </div>
                   <div className="space-y-4">
-                    {stepSections[activeStep].blocks.map((block, i) => renderBlock(block, i))}
+                    {stepSections[activeStep].blocks.map((block, i) =>
+                      renderBlock(block, i, lang),
+                    )}
                   </div>
                 </div>
               </article>
             )}
 
-            {/* Tab 6: Show ALL assessment content */}
+            {/* Tab 6: Assessment */}
             {isFinalTab && (
               <>
-                {/* Comparison Table */}
                 {comparisonSection && (
                   <article className="relative overflow-hidden rounded-3xl border border-white/30 bg-gradient-to-br from-[#fef3c7]/80 to-[#fde68a]/80 p-6 shadow-xl backdrop-blur-2xl dark:border-white/10 dark:from-[#3d3410]/80 dark:to-[#422e06]/80 sm:p-8">
                     <div className="absolute inset-0 bg-white/50 backdrop-blur-xl dark:bg-[#0f2742]/70" />
@@ -937,24 +1083,22 @@ export default function StudentGuideContent({
                         </h2>
                       </div>
                       <div className="space-y-4">
-                        {comparisonSection.blocks.map((block, i) => renderBlock(block, i))}
+                        {comparisonSection.blocks.map((block, i) => renderBlock(block, i, lang))}
                       </div>
                     </div>
                   </article>
                 )}
 
-                {/* Quiz Section */}
                 <div className="pt-4">
                   <div className="mb-6 flex items-center gap-3">
                     <HugeiconsIcon icon={Target01Icon} size={32} strokeWidth={2} />
                     <h2 className="text-2xl font-black text-[#17324d] dark:text-[#e7f7ff]">
-                      Асуулт: Өөрийгөө шалгаарай
+                      {L.quizTitle}
                     </h2>
                   </div>
-                  <QuizSection questions={quizQuestions} />
+                  <QuizSection questions={quizQuestions} lang={lang} />
                 </div>
 
-                {/* Conclusion */}
                 {conclusionSection && (
                   <article className="relative overflow-hidden rounded-3xl border border-white/30 bg-gradient-to-br from-[#f0fdf4]/80 to-[#dcfce7]/80 p-6 shadow-xl backdrop-blur-2xl dark:border-white/10 dark:from-[#0f2917]/80 dark:to-[#0d2917]/80 sm:p-8">
                     <div className="absolute inset-0 bg-white/50 backdrop-blur-xl dark:bg-[#0f2742]/70" />
@@ -964,17 +1108,16 @@ export default function StudentGuideContent({
                           <HugeiconsIcon icon={CheckmarkCircle02Icon} size={28} strokeWidth={2} />
                         </span>
                         <h2 className="text-2xl font-black text-[#17324d] dark:text-[#e7f7ff]">
-                          Дүгнэлт
+                          {L.conclusion}
                         </h2>
                       </div>
                       <div className="space-y-4">
-                        {conclusionSection.blocks.map((block, i) => renderBlock(block, i))}
+                        {conclusionSection.blocks.map((block, i) => renderBlock(block, i, lang))}
                       </div>
                     </div>
                   </article>
                 )}
 
-                {/* Homework */}
                 {homeworkSection && (
                   <article className="relative overflow-hidden rounded-3xl border border-white/30 bg-gradient-to-br from-[#dcfce7]/80 to-[#bbf7d0]/80 p-6 shadow-xl backdrop-blur-2xl dark:border-white/10 dark:from-[#0d2917]/80 dark:to-[#10291a]/80 sm:p-8">
                     <div className="absolute inset-0 bg-white/50 backdrop-blur-xl dark:bg-[#0f2742]/70" />
@@ -984,11 +1127,11 @@ export default function StudentGuideContent({
                           <HugeiconsIcon icon={PencilEdit01Icon} size={28} strokeWidth={2} />
                         </span>
                         <h2 className="text-2xl font-black text-[#17324d] dark:text-[#e7f7ff]">
-                          Гэрийн даалгавар
+                          {L.homework}
                         </h2>
                       </div>
                       <div className="space-y-4">
-                        {homeworkSection.blocks.map((block, i) => renderBlock(block, i))}
+                        {homeworkSection.blocks.map((block, i) => renderBlock(block, i, lang))}
                       </div>
                     </div>
                   </article>
@@ -1008,10 +1151,10 @@ export default function StudentGuideContent({
                   </span>
                   <div>
                     <p className="text-xs font-black uppercase tracking-wide text-[#64748b] dark:text-[#b8d7e8]">
-                      Өмнөх бүлэг
+                      {L.prevChapter}
                     </p>
                     <p className="text-lg font-black text-[#17324d] dark:text-[#e7f7ff]">
-                      Бүлэг {prevChapter}
+                      {L.chapterLabel(prevChapter)}
                     </p>
                   </div>
                 </Link>
@@ -1029,10 +1172,10 @@ export default function StudentGuideContent({
                   </span>
                   <div className="text-right sm:text-left">
                     <p className="text-xs font-black uppercase tracking-wide text-[#64748b] dark:text-[#b8d7e8]">
-                      Дараагийн бүлэг
+                      {L.nextChapter}
                     </p>
                     <p className="text-lg font-black text-[#17324d] dark:text-[#e7f7ff]">
-                      Бүлэг {nextChapter}
+                      {L.chapterLabel(nextChapter)}
                     </p>
                   </div>
                 </Link>
@@ -1046,12 +1189,10 @@ export default function StudentGuideContent({
           <aside className="space-y-4">
             <div className="sticky top-6 space-y-4">
               {/* Step Progress */}
-              <div className="rounded-2xl border border-white/30 bg-gradient-to-br from-[#fff7ed]/90 to-[#ffedd5]/90 p-5 shadow-lg backdrop-blur-2xl dark:border-white/10 dark:from-[#231b12]/90 dark:to-[#3d2410]/90"
-              >
-                <h2 className="mb-4 flex items-center gap-2 text-lg font-black text-[#9a3412] dark:text-[#fdba74]"
-                >
+              <div className="rounded-2xl border border-white/30 bg-gradient-to-br from-[#fff7ed]/90 to-[#ffedd5]/90 p-5 shadow-lg backdrop-blur-2xl dark:border-white/10 dark:from-[#231b12]/90 dark:to-[#3d2410]/90">
+                <h2 className="mb-4 flex items-center gap-2 text-lg font-black text-[#9a3412] dark:text-[#fdba74]">
                   <HugeiconsIcon icon={LeftToRightListNumberIcon} size={24} strokeWidth={2} />
-                  Алхмууд
+                  {L.steps}
                 </h2>
                 <div className="space-y-2">
                   {stepSections.map((step, i) => (
@@ -1064,10 +1205,10 @@ export default function StudentGuideContent({
                           : "bg-white/70 text-[#7c2d12] hover:bg-white dark:bg-black/20 dark:text-[#fed7aa]"
                       }`}
                     >
-                      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/50 text-xs font-black mr-2 dark:bg-black/30">
+                      <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/50 text-xs font-black dark:bg-black/30">
                         {i + 1}
                       </span>
-                      {step.title.replace(`Алхам ${i + 1}: `, "")}
+                      {getStepTitle(step.title, i)}
                     </button>
                   ))}
                   <button
@@ -1079,18 +1220,16 @@ export default function StudentGuideContent({
                     }`}
                   >
                     <HugeiconsIcon icon={Target01Icon} size={18} strokeWidth={2} />
-                    Дүгнэлт & Даалгавар
+                    {L.assessmentHomework}
                   </button>
                 </div>
               </div>
 
               {/* Key Points */}
-              <div className="rounded-2xl border border-white/30 bg-gradient-to-br from-[#fff7ed]/90 to-[#ffedd5]/90 p-5 shadow-lg backdrop-blur-2xl dark:border-white/10 dark:from-[#231b12]/90 dark:to-[#3d2410]/90"
-              >
-                <h2 className="mb-4 flex items-center gap-2 text-lg font-black text-[#9a3412] dark:text-[#fdba74]"
-                >
+              <div className="rounded-2xl border border-white/30 bg-gradient-to-br from-[#fff7ed]/90 to-[#ffedd5]/90 p-5 shadow-lg backdrop-blur-2xl dark:border-white/10 dark:from-[#231b12]/90 dark:to-[#3d2410]/90">
+                <h2 className="mb-4 flex items-center gap-2 text-lg font-black text-[#9a3412] dark:text-[#fdba74]">
                   <HugeiconsIcon icon={StickyNote01Icon} size={24} strokeWidth={2} />
-                  Гол санаа
+                  {L.keyPoints}
                 </h2>
                 <div className="space-y-3">
                   {keyPoints.length > 0 ? (
@@ -1109,18 +1248,16 @@ export default function StudentGuideContent({
                     ))
                   ) : (
                     <p className="text-sm font-semibold text-[#64748b] dark:text-[#94a3b8]">
-                      Гол санаа олдсонгүй
+                      {L.noKeyPoints}
                     </p>
                   )}
                 </div>
               </div>
 
               {/* Quick Links */}
-              <div className="rounded-2xl border border-white/30 bg-white/90 p-5 shadow-lg backdrop-blur-2xl dark:border-white/10 dark:bg-[#0f2742]/90"
-              >
-                <h2 className="mb-3 text-sm font-black uppercase tracking-wide text-[#64748b] dark:text-[#b8d7e8]"
-                >
-                  Хурдан холбоос
+              <div className="rounded-2xl border border-white/30 bg-white/90 p-5 shadow-lg backdrop-blur-2xl dark:border-white/10 dark:bg-[#0f2742]/90">
+                <h2 className="mb-3 text-sm font-black uppercase tracking-wide text-[#64748b] dark:text-[#b8d7e8]">
+                  {L.quickLinks}
                 </h2>
                 <div className="space-y-2">
                   <Link
@@ -1128,14 +1265,14 @@ export default function StudentGuideContent({
                     className="kid-focus flex items-center gap-3 rounded-xl bg-gradient-to-r from-[#dcfce7] to-[#bbf7d0] px-4 py-3 text-sm font-black text-[#166534] transition-all hover:from-[#bbf7d0] hover:to-[#86efac] hover:shadow-md"
                   >
                     <HugeiconsIcon icon={GameController01Icon} size={20} strokeWidth={2} />
-                    Бүлгийн түвшинд орох
+                    {L.enterLevel}
                   </Link>
                   <Link
                     href="/codebook"
                     className="kid-focus flex items-center gap-3 rounded-xl bg-gradient-to-r from-[#e0f2fe] to-[#bae6fd] px-4 py-3 text-sm font-black text-[#075985] transition-all hover:from-[#bae6fd] hover:to-[#7dd3fc] hover:shadow-md"
                   >
                     <HugeiconsIcon icon={BookOpen01Icon} size={20} strokeWidth={2} />
-                    Codebook харах
+                    {L.viewCodebook}
                   </Link>
                 </div>
               </div>

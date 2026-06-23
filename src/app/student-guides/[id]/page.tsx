@@ -34,11 +34,18 @@ export default async function StudentGuidePage({
   // Only use new design for chapter 8
   // if (chapterNum === 8) {
     const markdownPath = join(process.cwd(), "lectures", `chapter-${chapterNum}-student-guide-mn.md`);
+    const markdownPathEn = join(process.cwd(), "lectures", `chapter-${chapterNum}-student-guide-en.md`);
     let markdownContent = "";
+    let markdownContentEn = "";
     try {
       markdownContent = readFileSync(markdownPath, "utf-8");
     } catch (error) {
-      console.error("Failed to read markdown file:", error);
+      console.error("Failed to read MN markdown file:", error);
+    }
+    try {
+      markdownContentEn = readFileSync(markdownPathEn, "utf-8");
+    } catch {
+      // EN file not yet created — UI will show "coming soon"
     }
 
     return (
@@ -47,6 +54,7 @@ export default async function StudentGuidePage({
         prevChapter={prevChapter}
         nextChapter={nextChapter}
         markdownContent={markdownContent}
+        markdownContentEn={markdownContentEn}
       />
     );
   // }
