@@ -4,6 +4,7 @@ export type Level = {
   subtitle: string;
   level: string;
   instructions: Instructions;
+  instructionsEn?: Instructions;
 };
 export type Chapter = {
   title: string;
