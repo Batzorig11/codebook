@@ -2,6 +2,7 @@
 
 import { use, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   ArrowLeft02Icon,
@@ -11,6 +12,32 @@ import {
   Home03Icon,
 } from "@hugeicons/core-free-icons";
 import { chapters } from "@/data/chapters";
+import { useLang } from "@/context/LangContext";
+
+const LABELS = {
+  mn: {
+    backHome: "Нүүр",
+    selectLevel: "Түвшин сонгох",
+    taskTitle: "Даалгаврын тайлбар",
+    memoryTitle: "Санах дараалал",
+    memory: ["Газрын зургаа ажигла.", "Хэрэгтэй командыг сонго.", "Мөрүүдээ зөв дарааллаар бич.", "Run дарж үр дүнгээ шалга."],
+    nextLevel: "Дараагийн түвшин",
+    nextChapter: "Дараагийн бүлэг",
+    notFound: "Chapter not found",
+    backHomeBtn: "Нүүр рүү буцах",
+  },
+  en: {
+    backHome: "Home",
+    selectLevel: "Select Level",
+    taskTitle: "Level Description",
+    memoryTitle: "Remember",
+    memory: ["Study the map.", "Choose the right commands.", "Write your lines in the correct order.", "Press Run to check your result."],
+    nextLevel: "Next Level",
+    nextChapter: "Next Chapter",
+    notFound: "Chapter not found",
+    backHomeBtn: "Back to Home",
+  },
+} as const;
 
 const chapterColors = [
   "bg-[#ffdf6e]",
@@ -55,6 +82,12 @@ export default function ChapterPage({
 }) {
   const { id } = use(params);
   const [selectedLevel, setSelectedLevel] = useState<number>(0);
+  const { lang } = useLang();
+  const L = LABELS[lang];
+  const router = useRouter();
+  const chapterNum = Number(id) || 1;
+  const isLastLevel = selectedLevel === (chapters[id]?.levels.length ?? 1) - 1;
+  const hasNextChapter = chapterNum < 9;
 
   const chapter = chapters[id];
   const currentColor = chapterColors[(Number(id) || 1) - 1] ?? chapterColors[0];
@@ -68,7 +101,7 @@ export default function ChapterPage({
           className="kid-focus mt-5 inline-flex items-center gap-2 rounded-lg bg-[#17324d] px-5 py-3 font-bold text-white"
         >
           <HugeiconsIcon icon={Home03Icon} size={20} strokeWidth={2} />
-          Нүүр рүү буцах
+          {L.backHomeBtn}
         </Link>
       </main>
     );
@@ -86,7 +119,7 @@ export default function ChapterPage({
             className="kid-focus inline-flex w-fit items-center gap-2 rounded-lg bg-white px-4 py-3 text-sm font-black text-[#17324d] shadow-sm transition hover:-translate-y-0.5 hover:bg-[#e0f2fe] dark:bg-[#0f2742] dark:text-[#e7f7ff] dark:hover:bg-[#132f4d]"
           >
             <HugeiconsIcon icon={ArrowLeft02Icon} size={18} strokeWidth={2.2} />
-            Нүүр
+            {L.backHome}
           </Link>
 
           <Link
@@ -127,7 +160,7 @@ export default function ChapterPage({
 
             <div className="rounded-lg bg-[#f8fafc] p-4 dark:bg-[#10243a]">
               <p className="mb-3 text-sm font-black uppercase tracking-wide text-[#64748b] dark:text-[#b8d7e8]">
-                Түвшин сонгох
+                {L.selectLevel}
               </p>
               <div className="grid grid-cols-4 gap-2">
                 {chapter.levels.map((_, i) => (
@@ -156,11 +189,11 @@ export default function ChapterPage({
               <span className={`rounded-lg p-2 ${currentColor}`}>
                 <HugeiconsIcon icon={CheckmarkCircle02Icon} size={24} strokeWidth={2.2} />
               </span>
-              <h2 className="text-2xl font-black dark:text-[#e7f7ff]">Даалгаврын тайлбар</h2>
+              <h2 className="text-2xl font-black dark:text-[#e7f7ff]">{L.taskTitle}</h2>
             </div>
 
             <div className="space-y-5 text-lg font-semibold leading-8 text-[#334155] dark:text-[#d3e9f5]">
-              {level.instructions.map((paragraph, pi) => (
+              {(lang === "en" && level.instructionsEn ? level.instructionsEn : level.instructions).map((paragraph, pi) => (
                 <p key={pi}>
                   {paragraph.map((segment, si) =>
                     segment.className ? (
@@ -180,27 +213,32 @@ export default function ChapterPage({
           </article>
 
           <aside className="rounded-lg border-2 border-[#17324d]/10 bg-[#fff7ed] p-5 shadow-sm dark:border-white/10 dark:bg-[#231b12]">
-            <h2 className="text-xl font-black text-[#9a3412] dark:text-[#fdba74]">Санах дараалал</h2>
+            <h2 className="text-xl font-black text-[#9a3412] dark:text-[#fdba74]">{L.memoryTitle}</h2>
             <ol className="mt-4 space-y-3 text-sm font-bold leading-6 text-[#7c2d12] dark:text-[#fed7aa]">
-              <li>1. Газрын зургаа ажигла.</li>
-              <li>2. Хэрэгтэй командыг сонго.</li>
-              <li>3. Мөрүүдээ зөв дарааллаар бич.</li>
-              <li>4. Run дарж үр дүнгээ шалга.</li>
+              {L.memory.map((item, i) => (
+                <li key={i}>{i + 1}. {item}</li>
+              ))}
             </ol>
 
-            <button
-              type="button"
-              onClick={() =>
-                setSelectedLevel((prev) =>
-                  prev < chapter.levels.length - 1 ? prev + 1 : prev,
-                )
-              }
-              disabled={selectedLevel === chapter.levels.length - 1}
-              className="kid-focus mt-6 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#22c55e] px-4 py-3 text-sm font-black text-white shadow-sm transition hover:bg-[#16a34a] disabled:cursor-not-allowed disabled:bg-[#94a3b8]"
-            >
-              Дараагийн түвшин
-              <HugeiconsIcon icon={ArrowRight02Icon} size={18} strokeWidth={2.2} />
-            </button>
+            {isLastLevel && hasNextChapter ? (
+              <Link
+                href={`/chapter/${chapterNum + 1}`}
+                className="kid-focus mt-6 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#3b82f6] px-4 py-3 text-sm font-black text-white shadow-sm transition hover:bg-[#2563eb]"
+              >
+                {L.nextChapter}
+                <HugeiconsIcon icon={ArrowRight02Icon} size={18} strokeWidth={2.2} />
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setSelectedLevel((prev) => prev + 1)}
+                disabled={isLastLevel}
+                className="kid-focus mt-6 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#22c55e] px-4 py-3 text-sm font-black text-white shadow-sm transition hover:bg-[#16a34a] disabled:cursor-not-allowed disabled:bg-[#94a3b8]"
+              >
+                {L.nextLevel}
+                <HugeiconsIcon icon={ArrowRight02Icon} size={18} strokeWidth={2.2} />
+              </button>
+            )}
           </aside>
         </section>
       </div>

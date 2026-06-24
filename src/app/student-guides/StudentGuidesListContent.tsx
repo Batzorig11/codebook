@@ -40,9 +40,16 @@ const LABELS = {
   },
 } as const;
 
-export default function StudentGuidesListContent({ guides }: { guides: StudentGuide[] }) {
+export default function StudentGuidesListContent({
+  guides,
+  guidesEn,
+}: {
+  guides: StudentGuide[];
+  guidesEn: StudentGuide[];
+}) {
   const { lang } = useLang();
   const L = LABELS[lang];
+  const activeGuides = lang === "en" ? guidesEn : guides;
 
   return (
     <main className="min-h-screen px-4 py-8 text-[#17324d] dark:text-[#e7f7ff] sm:px-6 lg:px-8">
@@ -69,7 +76,7 @@ export default function StudentGuidesListContent({ guides }: { guides: StudentGu
         </section>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {guides.map((guide, index) => (
+          {activeGuides.map((guide, index) => (
             <Link
               key={guide.slug}
               href={`/student-guides/${guide.slug}`}

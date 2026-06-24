@@ -12,25 +12,22 @@ export type StudentGuide = {
 
 const guideDirectory = path.join(process.cwd(), "lectures");
 
-function getGuideFilename(chapter: number) {
-  return `chapter-${chapter}-student-guide-mn.md`;
-} //chapter-8-student-guide-mn.md - ingej garj irjin
+function getGuideFilename(chapter: number, lang: "mn" | "en" = "mn") {
+  return `chapter-${chapter}-student-guide-${lang}.md`;
+}
 
-function getGuidePath(chapter: number) {
-  return path.join(guideDirectory, getGuideFilename(chapter));
-} // /my-project/lectures/chapter-8-student-guide-mn.md - ene hesgiin bn
+function getGuidePath(chapter: number, lang: "mn" | "en" = "mn") {
+  return path.join(guideDirectory, getGuideFilename(chapter, lang));
+}
 
-function getTitle(markdown: string, chapter: number) {
-  
+function getTitle(markdown: string, chapter: number, lang: "mn" | "en" = "mn") {
   const title = markdown
     .split("\n")
     .find((line) => line.startsWith("# "))
     ?.replace(/^#\s+/, "")
     .trim();
-    console.log("title", title);
-    
 
-  return title || `Бүлэг ${chapter}`;
+  return title || (lang === "en" ? `Chapter ${chapter}` : `Бүлэг ${chapter}`);
 }
 
 function getExcerpt(markdown: string) {
@@ -41,19 +38,15 @@ function getExcerpt(markdown: string) {
       .find((line) => line && !line.startsWith("#")) || ""
   );
 }
-console.log("----geteexcerpt-----",getExcerpt);
-
 
 export function getStudentGuideSlugs() {
   return Array.from({ length: 9 }, (_, index) => `chapter-${index + 1}`);
 }
 
 export function getStudentGuide(chapter: number): StudentGuide | null {
-  const filename = getGuideFilename(chapter);
-  console.log("filenaem", filename);
-  
-  const filePath = getGuidePath(chapter);
-  console.log("filepath", filePath);
+  const lang = "mn";
+  const filename = getGuideFilename(chapter, lang);
+  const filePath = getGuidePath(chapter, lang);
 
   if (!fs.existsSync(filePath)) {
     return null;
@@ -64,15 +57,42 @@ export function getStudentGuide(chapter: number): StudentGuide | null {
   return {
     slug: `chapter-${chapter}`,
     chapter,
-    title: getTitle(markdown, chapter),
+    title: getTitle(markdown, chapter, lang),
     excerpt: getExcerpt(markdown),
     filename,
     markdown,
   };
 }
 
-export function getStudentGuides() {
+function getStudentGuideByLang(chapter: number, lang: "mn" | "en"): StudentGuide | null {
+  const filename = getGuideFilename(chapter, lang);
+  const filePath = getGuidePath(chapter, lang);
+
+  if (!fs.existsSync(filePath)) {
+    return null;
+  }
+
+  const markdown = fs.readFileSync(filePath, "utf8");
+
+  return {
+    slug: `chapter-${chapter}`,
+    chapter,
+    title: getTitle(markdown, chapter, lang),
+    excerpt: getExcerpt(markdown),
+    filename,
+    markdown,
+  };
+}
+
+export function getStudentGuides(): StudentGuide[] {
   return Array.from({ length: 9 }, (_, index) => getStudentGuide(index + 1)).filter(
     (guide): guide is StudentGuide => Boolean(guide),
   );
+}
+
+export function getStudentGuidesEn(): StudentGuide[] {
+  return Array.from({ length: 9 }, (_, i) => {
+    const enGuide = getStudentGuideByLang(i + 1, "en");
+    return enGuide ?? getStudentGuide(i + 1);
+  }).filter((g): g is StudentGuide => Boolean(g));
 }
