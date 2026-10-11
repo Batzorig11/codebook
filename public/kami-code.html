@@ -1,0 +1,767 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>KAMI Код талбай</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700;800&family=Nunito:wght@500;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: level map on the left, Python editor + memory + terminal on the right; one bright classroom look, chosen deliberately */
+:root{
+  --bg:#d9eef6; --paper:#ffffff; --ink:#1d2a44; --muted:#5a6a86;
+  --wall:#34436b; --grass:#e8f6df; --line:#c9e3bd; --trail:#d3f0c4;
+  --accent:#ff8a1f; --gold:#ffc23c; --gem:#2fb5e8; --water:#4aa8f0;
+  --ok:#1fa865; --bad:#e8455a;
+  --code-bg:#1d2a44; --code-fg:#e8f1ff; --code-dim:#7d8db0;
+  --f-display:"Rubik",system-ui,sans-serif;
+  --f-body:"Nunito",system-ui,sans-serif;
+  --f-code:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;
+  background-image:radial-gradient(#c5dbe6 1.2px,transparent 1.2px);background-size:22px 22px}
+.app{max-width:1180px;margin:0 auto;padding:16px;padding-block:16px 40px;display:flex;flex-direction:column;gap:14px}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand svg{width:42px;height:42px;flex:none}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(22px,4vw,30px);margin:0}
+h1 span{color:var(--accent)}
+.brand small{display:block;font-weight:700;color:var(--muted);font-size:13px;letter-spacing:.02em}
+.nav{display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+@media (max-width:700px){.nav{align-items:flex-start}}
+.chapters{display:flex;gap:4px;background:var(--paper);border:2px solid var(--wall);border-radius:14px;padding:3px}
+.ch{border:0;background:transparent;border-radius:10px;padding:6px 12px;font-family:var(--f-display);font-weight:700;font-size:14px;color:var(--ink);cursor:pointer}
+.ch.cur{background:var(--accent);color:#fff}
+.levels{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.levels .lab{font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-right:2px}
+.lv{width:38px;height:38px;border-radius:12px;border:2px solid var(--wall);background:var(--paper);font-family:var(--f-display);font-weight:800;font-size:16px;color:var(--ink);cursor:pointer;position:relative}
+.lv.cur{background:var(--wall);color:#fff}
+.lv.done::after{content:"★";position:absolute;top:-10px;right:-7px;color:var(--gold);font-size:16px;text-shadow:0 1px 0 var(--wall)}
+button:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.icon-btn{border:2px solid var(--wall);background:var(--paper);border-radius:12px;height:34px;padding:0 10px;font-weight:800;cursor:pointer;color:var(--ink);font-family:var(--f-body);font-size:13px}
+
+main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:14px;align-items:start}
+@media (max-width:860px){main{grid-template-columns:1fr}}
+.card{background:var(--paper);border:2px solid var(--wall);border-radius:18px;box-shadow:0 5px 0 var(--wall);padding:16px;min-width:0}
+.lvhead{display:flex;flex-direction:column;gap:2px;margin-bottom:12px}
+.eyebrow{font-family:var(--f-code);font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.04em}
+.lvhead h2{font-family:var(--f-display);font-size:22px;margin:0;text-wrap:balance}
+.rules{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.rules span{font-size:12px;font-weight:800;border-radius:999px;padding:3px 10px;background:#fde6ea;color:#a3182c;border:1.5px solid var(--bad)}
+.lvhead p{margin:0;font-weight:700;color:var(--ink);line-height:1.4}
+.board-wrap{display:flex;justify-content:center;overflow-x:auto;padding:4px 0}
+.board{position:relative;display:grid;border-radius:12px;overflow:hidden;border:3px solid var(--wall)}
+.cell{width:var(--cell);height:var(--cell);background:var(--grass);border:1px solid var(--line);position:relative}
+.cell.wall{background:#3f7a4a;border-color:#3f7a4a;background-image:radial-gradient(circle at 30% 35%,#5aa565 0 22%,transparent 23%),radial-gradient(circle at 70% 70%,#4f9659 0 26%,transparent 27%)}
+.cell.trail{background:var(--trail)}
+.cell.exit{background:#fff3c4}
+.cell.mark::before{content:"✕";position:absolute;inset:0;display:grid;place-items:center;color:var(--bad);font-weight:800;font-size:calc(var(--cell)*.55);font-family:var(--f-display)}
+.cell.mark.done::before{color:var(--ok)}
+.cell.mark[data-m]::before{content:attr(data-m);color:#7a4bd6}
+.cell.mark[data-m].done::before{color:var(--ok)}
+.cell.trough{background:#f3e3c8}
+.cell.trough::before{content:"";position:absolute;left:12%;right:12%;bottom:14%;height:34%;border:3px solid #8a5a2b;border-top:0;border-radius:0 0 10px 10px;background:#f3e3c8}
+.cell.trough::after{content:"✕";position:absolute;top:4%;left:0;right:0;text-align:center;color:var(--bad);font-weight:800;font-size:calc(var(--cell)*.32);font-family:var(--f-display)}
+.cell.trough.full::before{background:var(--water)}
+.cell.trough.full::after{content:"✓";color:var(--ok)}
+.cell.site{background:#f6ead9;background-image:repeating-linear-gradient(45deg,transparent 0 6px,rgba(201,122,30,.15) 6px 9px)}
+.cell.site span{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:calc(var(--cell)*.3);color:#8a5a2b}
+.cell.site.full{background:#e6d0a8}
+.cell.site.full span{color:var(--ok)}
+.spr{position:absolute;left:0;top:0;width:var(--cell);height:var(--cell);display:grid;place-items:center;pointer-events:none;transition:transform .28s cubic-bezier(.3,1.3,.5,1)}
+.spr svg{width:78%}
+.gem svg,.can svg{width:56%;animation:bob 1.6s ease-in-out infinite}
+.gem.got,.can.got{transform:translateY(-30px) scale(.2)!important;opacity:0;transition:all .4s}
+.exitspr svg{width:70%}
+.player{z-index:3}
+.player svg{width:84%}
+.player .hd{position:absolute;inset:0;transition:transform .25s}
+.player .hd::after{content:"";position:absolute;right:-2px;top:50%;margin-top:-7px;border:7px solid transparent;border-left:10px solid var(--accent);border-right:0}
+.player .carry{position:absolute;right:2%;bottom:4%;width:34%;display:none}
+.player.has .carry{display:block}
+.player.bump svg{animation:shake .35s}
+.player.happy>svg{animation:jump .5s ease 3}
+.bubble{position:absolute;bottom:88%;left:50%;transform:translateX(-50%);background:var(--paper);border:2px solid var(--wall);border-radius:12px;padding:4px 10px;font-weight:800;font-size:15px;white-space:nowrap;box-shadow:0 3px 0 var(--wall);z-index:5}
+.bubble::after{content:"";position:absolute;top:100%;left:50%;margin-left:-6px;border:6px solid transparent;border-top-color:var(--wall)}
+@keyframes bob{50%{transform:translateY(-4px)}}
+@keyframes shake{20%{transform:translateX(-5px) rotate(-6deg)}40%{transform:translateX(5px) rotate(6deg)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+@keyframes jump{50%{transform:translateY(-12px)}}
+.learn{margin-top:14px;padding:12px 14px;border-radius:12px;background:#fff6e8;border:2px dashed var(--accent);line-height:1.5;display:flex;flex-direction:column;gap:8px}
+.learn b{font-family:var(--f-display);color:var(--accent);letter-spacing:.06em;font-size:12px;text-transform:uppercase}
+.learn p{margin:0}
+.learn pre{margin:0;background:var(--code-bg);color:var(--code-fg);border-radius:10px;padding:8px 12px;font-family:var(--f-code);font-size:14px;overflow-x:auto}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;font-size:13px;font-weight:700;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:5px}
+.legend i{width:16px;height:16px;border-radius:4px;display:inline-block;border:1px solid rgba(0,0,0,.15)}
+
+.right{display:flex;flex-direction:column;gap:14px;min-width:0}
+.edhead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.sec-title{font-family:var(--f-display);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
+.file{font-family:var(--f-code);font-size:12px;color:var(--muted)}
+.editor{position:relative;display:flex;background:var(--code-bg);border-radius:14px;overflow:hidden;height:calc(26px*12 + 24px)}
+.gutter{flex:none;width:44px;padding:12px 0;overflow:hidden;background:#17223a;color:var(--code-dim);font-family:var(--f-code);font-size:15px;line-height:26px;text-align:right;user-select:none}
+.gutter div{padding-right:10px;height:26px}
+.gutter .act{color:var(--gold);background:rgba(255,194,60,.15)}
+.gutter .err{color:#fff;background:var(--bad)}
+.hl{position:absolute;left:44px;right:0;height:26px;pointer-events:none;background:rgba(255,194,60,.16);border-left:3px solid var(--gold)}
+.hl.err{background:rgba(232,69,90,.28);border-left-color:var(--bad)}
+textarea{flex:1;min-width:0;border:0;resize:none;background:transparent;color:var(--code-fg);font-family:var(--f-code);font-size:15px;line-height:26px;padding:12px 14px;white-space:pre;overflow:auto;caret-color:var(--gold);tab-size:4;position:relative;z-index:1}
+textarea:focus{outline:none}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{font-family:var(--f-code);font-size:13px;font-weight:700;border:2px solid var(--wall);background:var(--paper);color:var(--ink);border-radius:10px;padding:6px 9px;cursor:pointer}
+.chip:hover{background:#eef6fb}
+.chip.var{border-color:var(--accent);background:#fff6e8}
+.hint{font-size:13px;color:var(--muted);margin:8px 0 0;font-weight:700}
+.actions{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px}
+.btn{border:2px solid var(--wall);border-radius:14px;padding:12px 8px;font-family:var(--f-display);font-weight:800;font-size:15px;cursor:pointer;background:var(--paper);color:var(--ink);box-shadow:0 4px 0 var(--wall)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--wall)}
+.btn.run{background:var(--ok);color:#fff;font-size:18px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.mem{display:flex;flex-wrap:wrap;gap:8px;min-height:58px;align-items:flex-start}
+.mem .empty{color:var(--muted);font-size:14px;font-weight:700}
+.box{border:2px solid var(--wall);border-radius:10px;overflow:hidden;min-width:96px;font-family:var(--f-code);box-shadow:0 3px 0 var(--wall);transition:transform .2s}
+.box .nm{background:var(--wall);color:#fff;font-size:13px;font-weight:700;padding:3px 8px;display:flex;justify-content:space-between;gap:8px}
+.box .nm em{font-style:normal;color:var(--gold);font-size:11px}
+.box .vl{padding:6px 8px;font-size:17px;font-weight:700;background:#fff6e8}
+.box.flash{transform:scale(1.08)}
+.term{background:#0f1729;color:#cfe0ff;border-radius:14px;padding:12px 14px;font-family:var(--f-code);font-size:14px;line-height:1.6;min-height:96px;max-height:220px;overflow:auto;margin:0;white-space:pre-wrap;word-break:break-word}
+.term .dim{color:var(--code-dim)}.term .er{color:#ff8fa0;font-weight:700}.term .ok{color:#7ee2a8;font-weight:700}.term .say{color:var(--gold)}
+
+.overlay{position:fixed;inset:0;background:rgba(29,42,68,.55);display:grid;place-items:center;padding:16px;z-index:20}
+.modal{background:var(--paper);border:3px solid var(--wall);border-radius:22px;box-shadow:0 8px 0 var(--wall);padding:24px;max-width:520px;width:100%;text-align:center;max-height:100%;overflow:auto}
+.modal h2{font-family:var(--f-display);font-weight:800;font-size:clamp(24px,5vw,32px);margin:6px 0 10px;text-wrap:balance}
+.modal p{font-size:17px;line-height:1.5;margin:0 0 14px}
+.modal .robo{width:90px;margin:0 auto}
+.stars{font-size:46px;letter-spacing:6px;margin:4px 0}
+.stars .off{color:#d6dee8}.stars .on{color:var(--gold);text-shadow:0 2px 0 var(--wall)}
+.big{font-size:19px;padding:14px 24px;background:var(--accent);color:#fff}
+.confetti{position:fixed;top:-20px;font-size:22px;z-index:30;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* view switch + codebook */
+.views{display:flex;gap:4px;background:var(--paper);border:2px solid var(--wall);border-radius:14px;padding:3px}
+.vw{border:0;background:transparent;border-radius:10px;padding:7px 14px;font-family:var(--f-display);font-weight:800;font-size:15px;color:var(--ink);cursor:pointer}
+.vw.cur{background:var(--wall);color:#fff}
+.game-nav{display:flex;flex-direction:column;gap:8px;align-items:inherit}
+.cb-hero{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px}
+.cb-hero .tag{display:inline-block;background:#dcfce7;color:#166534;border-radius:999px;padding:4px 12px;font-weight:800;font-size:13px}
+.cb-hero h2{font-family:var(--f-display);font-weight:800;font-size:clamp(28px,5vw,40px);margin:8px 0 4px}
+.cb-hero p{margin:0;color:var(--muted);font-weight:700;line-height:1.5;max-width:56ch}
+.cb-tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.cb-search{border:2px solid var(--wall);border-radius:12px;padding:10px 12px;font-family:var(--f-code);font-size:15px;min-width:0;width:220px;max-width:100%;background:var(--paper);color:var(--ink)}
+.cb-search:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.cb-jump{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cb-jump a{font-family:var(--f-code);font-size:13px;font-weight:700;text-decoration:none;color:var(--ink);border:2px solid var(--wall);background:var(--paper);border-radius:10px;padding:5px 9px}
+.cb-jump a:hover{background:#eef6fb}
+.cb-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:14px}
+@media (max-width:860px){.cb-grid{grid-template-columns:1fr}}
+.cmd{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:14px;align-items:start;scroll-margin-top:16px}
+@media (max-width:520px){.cmd{grid-template-columns:1fr}}
+.cmd-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.cmd-n{flex:none;width:34px;height:34px;border-radius:10px;background:var(--gold);border:2px solid var(--wall);display:grid;place-items:center;font-family:var(--f-display);font-weight:800}
+.cmd h3{font-family:var(--f-code);font-size:20px;margin:0;color:var(--ink)}
+.cmd .lbl{font-family:var(--f-display);font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:12px 0 5px}
+.cmd .syn{margin:0;font-family:var(--f-code);font-size:14px;background:#eef6fb;border:1.5px solid #c5dbe6;border-radius:10px;padding:7px 10px;overflow-x:auto;white-space:pre}
+.cmd .desc{margin:0;line-height:1.55;font-weight:600}
+.cmd pre.ex{margin:0;background:var(--code-bg);color:var(--code-fg);border-radius:10px;padding:9px 12px;font-family:var(--f-code);font-size:14px;overflow-x:auto;line-height:1.55}
+.cmd .exd{margin:6px 0 0;font-size:14px;color:var(--muted);font-weight:700;line-height:1.45}
+.cmd img{width:100%;aspect-ratio:1;border-radius:12px;border:2px solid var(--wall);image-rendering:pixelated;background:var(--grass)}
+.cmd .tryit{margin-top:10px;width:100%;font-size:13px;padding:8px;box-shadow:0 3px 0 var(--wall)}
+.cb-empty{text-align:center;color:var(--muted);font-weight:800;padding:20px}
+.cb-start{margin-top:16px;text-align:center}
+</style>
+
+<div class="app">
+  <header>
+    <div class="brand">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><use href="#robo"/></svg>
+      <div><h1>KAMI <span>Код</span> талбай</h1><small id="chSub">Codebook · командын лавлах</small></div>
+    </div>
+    <div class="nav">
+      <div class="views" role="tablist" aria-label="Хэсэг сонгох">
+        <button class="vw cur" id="vwBook" role="tab" aria-selected="true">📖 Codebook</button>
+        <button class="vw" id="vwGame" role="tab" aria-selected="false">▶ Тоглоом</button>
+      </div>
+      <div class="game-nav" id="gameNav" hidden>
+        <div class="chapters" id="chapters" role="tablist"></div>
+        <div class="levels" id="levels"><span class="lab">Level</span></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="bookView">
+    <div class="card">
+      <div class="cb-hero">
+        <div>
+          <span class="tag">Кодын лавлах</span>
+          <h2>Codebook</h2>
+          <p>KAMI тоглоомын команд бүрийн бичиглэл, тайлбар, жишээг нэг дороос хар. Кодоо бичихдээ мартсан командаа эндээс хайгаарай.</p>
+        </div>
+        <div class="cb-tools">
+          <input class="cb-search" id="cbSearch" type="search" placeholder="Команд хайх…" aria-label="Команд хайх" autocomplete="off" spellcheck="false">
+          <button class="btn big" id="cbPlay">▶ Тоглож эхлэх</button>
+        </div>
+      </div>
+      <nav class="cb-jump" id="cbJump" aria-label="Командууд"></nav>
+    </div>
+    <div class="cb-grid" id="cbGrid"></div>
+    <p class="cb-empty" id="cbEmpty" hidden>Ийм команд олдсонгүй.</p>
+  </section>
+
+  <main id="gameView" hidden>
+    <section class="card">
+      <div class="lvhead">
+        <span class="eyebrow" id="lvEyebrow"></span>
+        <h2 id="lvTitle"></h2>
+        <p id="lvGoal"></p>
+        <div class="rules" id="rules"></div>
+      </div>
+      <div class="board-wrap" id="boardWrap"><div class="board" id="board"></div></div>
+      <div class="legend" id="legend"></div>
+      <div class="learn"><b>Энэ level-д</b><p id="learnText"></p><pre id="learnEx"></pre></div>
+    </section>
+
+    <section class="right">
+      <div class="card">
+        <div class="edhead"><p class="sec-title">Code Editor</p><span class="file">main.py · хамгийн богино: <span id="bestN">1</span> мөр</span></div>
+        <div class="editor" id="editor">
+          <div class="gutter" id="gutter"></div>
+          <div class="hl" id="hl" hidden></div>
+          <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Python код бичих хэсэг"></textarea>
+        </div>
+        <div class="chips" id="chips"></div>
+        <p class="hint">Кодоо гараараа бич. Товчлуур дээр дарвал тухайн мөр шинэ мөрөнд нэмэгдэнэ. Ctrl+Enter = Run.</p>
+      </div>
+      <div class="actions">
+        <button class="btn run" id="runBtn">▶ Run</button>
+        <button class="btn" id="stepBtn">Алхамаар</button>
+        <button class="btn" id="resetBtn">Эхнээс</button>
+      </div>
+      <div class="card" id="memCard" hidden>
+        <p class="sec-title" style="margin-bottom:8px">Хувьсагчид · компьютерийн санах ой</p>
+        <div class="mem" id="mem"></div>
+      </div>
+      <div>
+        <div class="edhead" style="margin-bottom:6px"><p class="sec-title">Terminal</p><button class="icon-btn" id="muteBtn" aria-pressed="false">Дуу: асаалттай</button></div>
+        <pre class="term" id="term"></pre>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="overlay" id="win" hidden>
+  <div class="modal">
+    <svg class="robo" viewBox="0 0 40 40" aria-hidden="true"><use href="#robo"/></svg>
+    <h2 id="winTitle">Level дууслаа!</h2>
+    <div class="stars" id="stars"></div>
+    <p id="winText"></p>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn" id="againBtn">Кодоо сайжруулах</button>
+      <button class="btn big" id="nextBtn">Дараагийн level →</button>
+    </div>
+  </div>
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="robo">
+      <line x1="20" y1="4" x2="20" y2="10" stroke="#34436b" stroke-width="2"/>
+      <circle cx="20" cy="4" r="2.6" fill="#ff8a1f"/>
+      <rect x="6" y="9" width="28" height="20" rx="7" fill="#17ad9f" stroke="#34436b" stroke-width="2"/>
+      <rect x="10" y="13" width="20" height="10" rx="4" fill="#e9fffb"/>
+      <circle cx="16" cy="18" r="2.4" fill="#1d2a44"/><circle cx="25" cy="18" r="2.4" fill="#1d2a44"/>
+      <circle cx="16.8" cy="17.2" r=".8" fill="#fff"/><circle cx="25.8" cy="17.2" r=".8" fill="#fff"/>
+      <path d="M17 25.5q3.5 2.4 7 0" stroke="#1d2a44" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <rect x="11" y="29" width="18" height="7" rx="3" fill="#34436b"/>
+      <rect x="3" y="15" width="3.5" height="8" rx="1.7" fill="#ff8a1f"/><rect x="33.5" y="15" width="3.5" height="8" rx="1.7" fill="#ff8a1f"/>
+    </g>
+    <g id="gemg"><path d="M20 4 34 16 20 36 6 16Z" fill="#2fb5e8" stroke="#1d2a44" stroke-width="2" stroke-linejoin="round"/><path d="M6 16h28M20 4l-6 12 6 20 6-20Z" fill="none" stroke="#1d2a44" stroke-width="1.4" stroke-linejoin="round"/><path d="M14 9l-3 5" stroke="#fff" stroke-width="2" stroke-linecap="round"/></g>
+    <g id="cang"><rect x="15" y="3" width="10" height="6" rx="2" fill="#8a5a2b" stroke="#1d2a44" stroke-width="2"/><rect x="8" y="9" width="24" height="28" rx="8" fill="#4aa8f0" stroke="#1d2a44" stroke-width="2"/><rect x="8" y="18" width="24" height="8" fill="#c97a1e" stroke="#1d2a44" stroke-width="1.6"/><path d="M14 13v3" stroke="#fff" stroke-width="2" stroke-linecap="round"/></g>
+    <g id="rockg"><path d="M5 30q-2-12 8-18 6-6 14-2 9 3 9 13 1 9-8 11H11q-5 0-6-4Z" fill="#9aa6b8" stroke="#34436b" stroke-width="2"/><path d="M13 17q4-4 9-2M26 26q3-1 4-4" stroke="#c9d2de" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+    <g id="doorg"><path d="M9 36V14q0-10 11-10t11 10v22Z" fill="#c97a1e" stroke="#34436b" stroke-width="2"/><path d="M13 36V15q0-7 7-7t7 7v21" fill="#ffc23c" stroke="#34436b" stroke-width="1.6"/><circle cx="24" cy="23" r="1.6" fill="#34436b"/></g>
+  </defs>
+</svg>
+
+<script>
+/* KAMI Код талбай: Python-like interpreter + world simulation (pure, testable) */
+var KAMI = (function(){
+const FN = {
+  move_forward:{args:"num",opt:true}, turn_left:{args:"none"}, turn_right:{args:"none"},
+  collect_item:{args:"none"}, push:{args:"none"}, speak:{args:"str"},
+  water:{args:"none"}, place:{args:"num"}
+};
+const ALIAS = {move:"move_forward",forward:"move_forward",moveforward:"move_forward",move_foward:"move_forward",move_froward:"move_forward",go:"move_forward",walk:"move_forward",
+  turnleft:"turn_left",left:"turn_left",turn_lef:"turn_left",turnright:"turn_right",right:"turn_right",turn_rigth:"turn_right",turn:"turn_left",
+  collect:"collect_item",collectitem:"collect_item",collect_items:"collect_item",pick:"collect_item",take:"collect_item",
+  say:"speak",talk:"speak",print:"speak",pushs:"push",waters:"water",watering:"water",pour:"water",put:"place",build:"place",places:"place"};
+const RESERVED=["player","import","print","if","for","while","def","in","and","or","not","True","False","None","class","return"];
+const VEC=[[1,0],[0,1],[-1,0],[0,-1]];
+
+function stripComment(s){let q=null;for(let i=0;i<s.length;i++){const c=s[i];if(q){if(c===q)q=null}else if(c==='"'||c==="'")q=c;else if(c==="#")return s.slice(0,i)}return s}
+function err(line,type,msg){return {line,ln:line,type,msg}}
+function lit(a){a=a.trim();let m;
+  if(/^-?\d+$/.test(a))return {v:+a,kind:"int"};
+  if(/^-?\d+\.\d*$/.test(a))return {v:+a,kind:"float"};
+  if((m=a.match(/^(["'])(.*)\1$/))&&m[2].indexOf(m[1])<0)return {v:m[2],kind:"str"};
+  if(/^["']/.test(a))return {bad:"Хашилт хаагдаагүй байна. Текстийн хоёр талд ижил хашилт тавь: \"Hello\""};
+  if(/^[A-Za-z_]\w*$/.test(a))return {name:a};
+  return {bad:null};
+}
+
+function parse(code,allowed,opt){opt=opt||{};const noLit=opt.noLiteral||[];
+  const lines=code.replace(/\r/g,"").split("\n"),ops=[],vars={};let imported=false;
+  const lookup=(name,ln)=>{if(name in vars)return {v:vars[name].v,kind:vars[name].kind,usedVar:true};
+    const lw=Object.keys(vars).find(k=>k.toLowerCase()===name.toLowerCase());
+    if(lw)return {e:err(ln,"NameError","«"+name+"» гэсэн хувьсагч алга. Python том, жижиг үсгийг ялгадаг: «"+lw+"» гэж бич.")};
+    return null};
+  for(let i=0;i<lines.length;i++){
+    const ln=i+1,raw=lines[i],body=stripComment(raw),t=body.trim();
+    if(!t)continue;
+    if(/^[ \t]/.test(body))return {error:err(ln,"IndentationError","Мөрийн эхэнд хоосон зай байна. Python-д мөр бүр зүүн захаас эхэлнэ. Эхний зайг устга.")};
+    if(/[“”«»„]/.test(t))return {error:err(ln,"SyntaxError","Энэ хашилтыг Python танихгүй. Англи гарын \" хашилтыг ашигла.")};
+    let m;
+    if((m=t.match(/^import\s+(\S+)$/))){
+      if(m[1]==="player"){imported=true;continue}
+      if(m[1].toLowerCase()==="player")return {error:err(ln,"ModuleNotFoundError","Python том, жижиг үсгийг ялгадаг. import player гэж бүгдийг жижиг үсгээр бич.")};
+      return {error:err(ln,"ModuleNotFoundError","«"+m[1]+"» гэсэн сан олдсонгүй. Бидэнд хэрэгтэй сан: import player")};
+    }
+    if(/^import\s*$/.test(t))return {error:err(ln,"SyntaxError","import-ийн ард сангийн нэрийг бич: import player")};
+    /* assignment */
+    if(/^[^=()"']*[^=!<>]=[^=]/.test(t)&&!/^[A-Za-z_]\w*\s*\./.test(t)){
+      const eq=t.indexOf("="),L=t.slice(0,eq).trim(),R=t.slice(eq+1).trim();
+      if(/^\d/.test(L)&&/^[A-Za-z_]\w*$/.test(R))return {error:err(ln,"SyntaxError","Хувьсагчийн нэр = тэмдгийн ЗҮҮН талд бичигдэнэ: "+R+" = "+L)};
+      if(/^\d/.test(L))return {error:err(ln,"SyntaxError","Хувьсагчийн нэр тоогоор эхэлж болохгүй. Жишээ: steps = 3")};
+      if(/[А-Яа-яЁёӨөҮү]/.test(L))return {error:err(ln,"SyntaxError","Хувьсагчийн нэрийг латин үсгээр бич. Жишээ: steps = 3")};
+      if(/\s/.test(L))return {error:err(ln,"SyntaxError","Хувьсагчийн нэрэнд хоосон зай байж болохгүй. Доогуур зураас ашигла: my_steps = 3")};
+      if(!/^[A-Za-z_]\w*$/.test(L))return {error:err(ln,"SyntaxError","Хувьсагчийн нэр зөвхөн үсэг, тоо, _ тэмдэгтээс бүрдэнэ.")};
+      if(RESERVED.indexOf(L)>=0)return {error:err(ln,"SyntaxError","«"+L+"» нэрийг Python өөрөө ашигладаг. Өөр нэр сонго.")};
+      if(!R)return {error:err(ln,"SyntaxError","= тэмдгийн баруун талд утга бич. Жишээ: "+L+" = 3")};
+      const v=lit(R);
+      if(v.bad!==undefined)return {error:err(ln,"SyntaxError",v.bad||"Энэ утгыг Python ойлгосонгүй. Тоо (3) эсвэл хашилттай текст (\"Hello\") бич.")};
+      let val;
+      if(v.name){const r=lookup(v.name,ln);if(r&&r.e)return {error:r.e};if(!r)return {error:err(ln,"NameError","«"+v.name+"» гэсэн хувьсагч алга. Текст бол хашилтад бич: "+L+" = \""+v.name+"\"")};val={v:r.v,kind:r.kind}}
+      else val={v:v.v,kind:v.kind};
+      if(opt.maxVars&&!(L in vars)&&Object.keys(vars).length>=opt.maxVars)return {error:err(ln,"Дүрэм","Энэ level-д зөвхөн "+opt.maxVars+" хувьсагч ашиглана. Шинэ нэр үүсгэхийн оронд «"+Object.keys(vars)[0]+"»-ийн утгыг өөрчил: "+Object.keys(vars)[0]+" = ...")};
+      vars[L]=val;ops.push({ln,fn:"assign",name:L,v:val.v,kind:val.kind});continue;
+    }
+    if(/^[A-Za-z_]\w*\s*==/.test(t))return {error:err(ln,"SyntaxError","Утга оноохдоо ганц = тэмдэг ашиглана: steps = 3")};
+    const open=(t.match(/\(/g)||[]).length,close=(t.match(/\)/g)||[]).length;
+    if(open!==close)return {error:err(ln,"SyntaxError",open>close?"Хаалт хаагдаагүй байна. Төгсгөлд нь ) нэмээрэй.":"Илүү ) хаалт байна. Нээх ( хаалт дутуу.")};
+    if((m=t.match(/^([A-Za-z_]\w*)\s*\.\s*([A-Za-z_]\w*)\s*$/))){
+      if(m[1]==="player"&&FN[m[2]])return {error:err(ln,"SyntaxError","Функц дуудахдаа () хаалт мартсан байна. Ингэж бич: player."+m[2]+"()")};
+    }
+    if((m=t.match(/^([A-Za-z_]\w*)\s*\(([^()]*)\)$/))){
+      const f=m[1];
+      if(f==="print"){const s=argVal(m[2],"any",ln,lookup);if(s.error)return {error:s.error};ops.push({ln,fn:"print",text:String(s.v),usedVar:s.usedVar});continue}
+      if(FN[f]||ALIAS[f.toLowerCase()])return {error:err(ln,"NameError","«"+f+"» гэдгийг Python танихгүй. Функцийн өмнө player. гэж бичих хэрэгтэй: player."+(FN[f]?f:ALIAS[f.toLowerCase()])+"()")};
+      return {error:err(ln,"NameError","«"+f+"» гэсэн функц алга.")};
+    }
+    if((m=t.match(/^([A-Za-z_]\w*)\s*\.\s*([A-Za-z_]\w*)\s*\(([^()]*)\)$/))){
+      const obj=m[1],f=m[2],a=m[3].trim();
+      if(obj!=="player"){
+        if(obj.toLowerCase()==="player")return {error:err(ln,"NameError","Python том, жижиг үсгийг ялгадаг. «"+obj+"» биш, player гэж жижиг үсгээр бич.")};
+        return {error:err(ln,"NameError","«"+obj+"» гэдгийг Python танихгүй. Бидний дүрийн нэр player.")};
+      }
+      if(!imported)return {error:err(ln,"NameError","player-ийг Python танихгүй байна. Кодын хамгийн эхэнд import player гэж бичээрэй.")};
+      if(!FN[f]){
+        const fl=f.toLowerCase();
+        if(FN[fl])return {error:err(ln,"AttributeError","Python том, жижиг үсгийг ялгадаг. "+fl+"() гэж жижиг үсгээр бич.")};
+        const sug=ALIAS[fl]||ALIAS[fl.replace(/_/g,"")];
+        if(sug&&(!allowed||allowed.indexOf(sug)>=0))return {error:err(ln,"AttributeError","player-д «"+f+"» гэсэн функц байхгүй. Чи player."+sug+"() гэж бичих гэсэн үү?")};
+        return {error:err(ln,"AttributeError","player-д «"+f+"» гэсэн функц байхгүй. Энэ level-ийн функцууд: "+(allowed||Object.keys(FN)).join(", "))};
+      }
+      if(allowed&&allowed.indexOf(f)<0)return {error:err(ln,"AttributeError",f+"() функц энэ level-д хэрэггүй.")};
+      const spec=FN[f];
+      if(spec.args==="none"){if(a)return {error:err(ln,"TypeError",f+"() хаалтандаа юу ч авдаггүй. Хоосон хаалттай бич: player."+f+"()")};ops.push({ln,fn:f});continue}
+      if(spec.args==="num"){
+        if(!a&&noLit.indexOf("num")>=0)return {error:err(ln,"Дүрэм","Энэ level-д тоог зөвхөн хувьсагчаар өгнө. Жишээ: one = 1, дараа нь player."+f+"(one)")};
+        if(!a){if(spec.opt){ops.push({ln,fn:f,n:1});continue}return {error:err(ln,"TypeError",f+"()-д хэдийг гэдгээ хаалтанд бич. Жишээ: player."+f+"(planks)")}}
+        const s=argVal(a,"int",ln,lookup,f);if(s.error)return {error:s.error};
+        if(!s.usedVar&&noLit.indexOf("num")>=0)return {error:err(ln,"Дүрэм","Энэ level-д "+f+"()-д тоог шууд бичихгүй. Эхлээд хувьсагчид хадгал: steps = "+s.v+", дараа нь player."+f+"(steps)")};
+        if(s.v<1)return {error:err(ln,"ValueError","Тоо 1-ээс их байх ёстой.")};
+        if(s.v>30)return {error:err(ln,"ValueError","Хэт их тоо байна. 30-аас бага тоо ашигла.")};
+        ops.push({ln,fn:f,n:s.v,usedVar:s.usedVar});continue}
+      if(spec.args==="str"){if(!a)return {error:err(ln,"TypeError","speak()-д хэлэх үгээ бич: player.speak(\"Hello\")")};
+        const s=argVal(a,"str",ln,lookup,f);if(s.error)return {error:s.error};
+        if(!s.usedVar&&noLit.indexOf("str")>=0)return {error:err(ln,"Дүрэм","Энэ level-д үгээ хувьсагчид хадгалаад хэлнэ: word = \""+s.v+"\", дараа нь player.speak(word)")};ops.push({ln,fn:f,text:String(s.v),usedVar:s.usedVar});continue}
+    }
+    if(/^[A-Za-z_]\w*\s*\.\s*[A-Za-z_]\w*\s+\S/.test(t)||/\)\s*\S/.test(t))return {error:err(ln,"SyntaxError","Нэг мөрөнд нэг л команд бичнэ. Дараагийн командыг шинэ мөрөнд бич.")};
+    if(/^[A-Za-z_]\w*$/.test(t)){const r=lookup(t,ln);if(r&&!r.e)continue;return {error:err(ln,"NameError","«"+t+"» гэдгийг Python танихгүй. Функц бол player."+t+"() гэж бич.")}}
+    if(/[А-Яа-яЁёӨөҮү]/.test(t))return {error:err(ln,"SyntaxError","Python команд латин үсгээр бичигддэг. Тайлбар (коммент) бичих бол мөрийн эхэнд # тавь.")};
+    return {error:err(ln,"SyntaxError","Энэ мөрийг Python ойлгосонгүй. Жишээ: player.move_forward()")};
+  }
+  if(!ops.length&&!imported)return {error:err(1,"Хоосон","Код хоосон байна. Эхлээд import player гэж бичээрэй.")};
+  return {ops};
+}
+function argVal(a,want,ln,lookup,f){
+  const v=lit(a);
+  if(v.bad!==undefined)return {error:err(ln,"SyntaxError",v.bad||"Хаалтан доторх утгыг Python ойлгосонгүй.")};
+  let val,usedVar=false,name=v.name;
+  if(name){const r=lookup(name,ln);if(r&&r.e)return {error:r.e};
+    if(!r){if(want==="int")return {error:err(ln,"NameError","«"+name+"» гэсэн хувьсагч алга. Эхлээд утга оноо: "+name+" = 3")};
+      return {error:err(ln,"NameError","«"+name+"» гэсэн хувьсагч алга. Текст бол хашилтад бич: \""+name+"\". Хувьсагч бол эхлээд утга оноо: "+name+" = \"...\"")}}
+    val={v:r.v,kind:r.kind};usedVar=true}
+  else val={v:v.v,kind:v.kind};
+  if(want==="int"){
+    if(val.kind==="float")return {error:err(ln,"TypeError","Бүхэл тоо хэрэгтэй. "+val.v+" биш, жишээ нь 3 гэж бич.")};
+    if(val.kind==="str")return {error:err(ln,"TypeError",(name?"«"+name+"» хувьсагч текст (\""+val.v+"\") хадгалж байна":"\""+val.v+"\" бол текст")+". "+f+"()-д тоо хэрэгтэй. Тоог хашилтгүй бич: "+(name||"steps")+" = "+(/^\d+$/.test(val.v)?val.v:"3"))};
+  }
+  return {v:val.v,usedVar};
+}
+
+function parseMap(L){const w={rows:L.map.length,cols:L.map[0].length,walls:new Set(),gems:new Set(),rocks:new Set(),troughs:new Set(),sites:{},canteen:null,exit:null,marks:{},start:null,dir:L.dir||0};
+  L.map.forEach((r,y)=>[...r].forEach((c,x)=>{const k=x+","+y;if(c==="#")w.walls.add(k);if(c==="*")w.gems.add(k);if(c==="B")w.rocks.add(k);if(c==="E")w.exit=k;if(c==="X"||c==="Y"||c==="Z")w.marks[k]=c;if(c==="P")w.start={x,y};
+    if(c==="T")w.troughs.add(k);if(c==="C")w.canteen=k;if(/[1-9]/.test(c))w.sites[k]=+c}));return w}
+
+function simulate(L,ops){
+  const says=L.says||(L.say?{X:L.say}:{}),spoken=new Set(),nMarks=Object.keys(parseMap(L).marks).length;const w=parseMap(L),gems=new Set(w.gems),rocks=new Set(w.rocks),watered=new Set(),placed={};let x=w.start.x,y=w.start.y,d=w.dir,canteen=false;const ev=[];
+  Object.keys(w.sites).forEach(k=>placed[k]=0);
+  const usedVar=ops.some(o=>o.usedVar);
+  const k=(a,b)=>a+","+b,inb=(a,b)=>a>=0&&b>=0&&a<w.cols&&b<w.rows;
+  const sitesOk=()=>Object.keys(w.sites).every(s=>placed[s]===w.sites[s]);
+  const goalOk=()=>gems.size===0&&spoken.size===nMarks&&watered.size===w.troughs.size&&sitesOk()&&(!w.canteen||canteen)&&(!L.needVar||usedVar)&&(!w.exit||k(x,y)===w.exit);
+  const blocked=(nk)=>w.walls.has(nk)||w.troughs.has(nk)&&false;
+  for(const o of ops){
+    if(o.fn==="assign"){ev.push({t:"assign",ln:o.ln,name:o.name,v:o.v,kind:o.kind});continue}
+    if(o.fn==="print"){ev.push({t:"print",ln:o.ln,text:o.text});continue}
+    if(o.fn==="turn_left"||o.fn==="turn_right"){d=(d+(o.fn==="turn_left"?3:1))%4;ev.push({t:"turn",ln:o.ln,d});}
+    else if(o.fn==="move_forward"){
+      for(let s=0;s<o.n;s++){const nx=x+VEC[d][0],ny=y+VEC[d][1],nk=k(nx,ny);
+        if(!inb(nx,ny)||blocked(nk)){ev.push({t:"bump",ln:o.ln});ev.push({t:"error",ln:o.ln,type:"Алдаа",msg:"Дүр хананд мөргөлөө. "+o.ln+"-р мөрийг шалга: алхмын тоо эсвэл чиглэл буруу байна."});return ev}
+        if(rocks.has(nk)){ev.push({t:"bump",ln:o.ln});ev.push({t:"error",ln:o.ln,type:"Алдаа",msg:"Урд чинь чулуу байна. Эхлээд player.push() гэж түлхээрэй."});return ev}
+        x=nx;y=ny;ev.push({t:"move",ln:o.ln,x,y});if(goalOk()){ev.push({t:"win"});return ev}}
+      continue;
+    }
+    else if(o.fn==="collect_item"){const ck=k(x,y);
+      if(ck===w.canteen&&!canteen){canteen=true;ev.push({t:"canteen",ln:o.ln,k:ck})}
+      else if(gems.has(ck)){gems.delete(ck);ev.push({t:"collect",ln:o.ln,k:ck})}
+      else{ev.push({t:"error",ln:o.ln,type:"Алдаа",msg:"Энд цуглуулах зүйл алга. Яг дээр нь очоод collect_item() дууд."});return ev}}
+    else if(o.fn==="push"){const fx=x+VEC[d][0],fy=y+VEC[d][1],fk=k(fx,fy);
+      if(!rocks.has(fk)){ev.push({t:"error",ln:o.ln,type:"Алдаа",msg:"Урд чинь түлхэх чулуу алга. Дүр чулуу руу харж, яг хажууд нь зогсох ёстой."});return ev}
+      const bx=fx+VEC[d][0],by=fy+VEC[d][1],bk=k(bx,by);
+      if(!inb(bx,by)||w.walls.has(bk)||rocks.has(bk)||gems.has(bk)||bk===w.exit||bk in w.marks){ev.push({t:"bump",ln:o.ln});ev.push({t:"error",ln:o.ln,type:"Алдаа",msg:"Чулууны цаана зай алга, түлхэж чадсангүй."});return ev}
+      rocks.delete(fk);rocks.add(bk);ev.push({t:"push",ln:o.ln,from:fk,to:bk});}
+    else if(o.fn==="speak"){const ck=k(x,y),m=w.marks[ck],ok=!!m&&o.text===says[m];if(ok)spoken.add(ck);ev.push({t:"speak",ln:o.ln,text:o.text,ok,on:!!m,want:m?says[m]:null,k:ck});}
+    else if(o.fn==="water"){const ck=k(x,y);
+      if(!canteen){ev.push({t:"error",ln:o.ln,type:"Алдаа",msg:"Усны сав алга. Эхлээд савтай нүдэн дээр очоод player.collect_item() гэж ав."});return ev}
+      if(!w.troughs.has(ck)){ev.push({t:"error",ln:o.ln,type:"Алдаа",msg:"Энд тэвш алга. Тэвшний X тэмдэг дээр яг очоод water() дууд."});return ev}
+      if(watered.has(ck)){ev.push({t:"error",ln:o.ln,type:"Алдаа",msg:"Энэ тэвш аль хэдийн дүүрсэн. Дараагийн тэвш рүү яв."});return ev}
+      watered.add(ck);ev.push({t:"water",ln:o.ln,k:ck});}
+    else if(o.fn==="place"){const ck=k(x,y);
+      if(!(ck in w.sites)){ev.push({t:"error",ln:o.ln,type:"Алдаа",msg:"Энд барилгын талбай алга. Тоотой нүдэн дээр очоод place() дууд."});return ev}
+      placed[ck]+=o.n;
+      if(placed[ck]>w.sites[ck]){ev.push({t:"place",ln:o.ln,k:ck,n:placed[ck],need:w.sites[ck]});ev.push({t:"error",ln:o.ln,type:"Алдаа",msg:"Хэт олон! Энд "+w.sites[ck]+" хэрэгтэй байсан, чи "+placed[ck]+" тавилаа. Хувьсагчийнхаа утгыг шалга."});return ev}
+      ev.push({t:"place",ln:o.ln,k:ck,n:placed[ck],need:w.sites[ck]});}
+    if(goalOk()){ev.push({t:"win"});return ev}
+  }
+  const miss=[];
+  if(w.canteen&&!canteen)miss.push("усны сав аваагүй");
+  if(watered.size<w.troughs.size)miss.push((w.troughs.size-watered.size)+" тэвш услаагүй");
+  Object.keys(w.sites).forEach(s=>{if(placed[s]!==w.sites[s])miss.push("талбайд "+w.sites[s]+" биш "+placed[s]+" тавьсан")});
+  if(gems.size)miss.push(gems.size+" эрдэнэ цуглуулаагүй");
+  Object.keys(w.marks).forEach(mk=>{if(!spoken.has(mk))miss.push(w.marks[mk]+" тэмдэг дээр \""+says[w.marks[mk]]+"\" гэж хэлээгүй")});
+  if(L.needVar&&!usedVar)miss.push("хувьсагч ашиглаагүй");
+  if(w.exit&&k(x,y)!==w.exit)miss.push("гарцад хүрээгүй");
+  ev.push({t:"error",ln:0,type:"Дуусаагүй",msg:"Код бүхэлдээ ажилласан ч даалгавар дуусаагүй: "+miss.join(", ")+"."});
+  return ev;
+}
+function countLines(ops){return ops.filter(o=>o.fn!=="print").length}
+return {parse,simulate,parseMap,countLines,FN,VEC};
+})();
+
+
+var CHAPTERS=[
+ {n:1,title:"Python програмчлалын эхлэл",levels:[
+ {name:"Starting Out",mn:"Анхны алхам",fns:["move_forward"],best:1,
+  goal:"Дүрийг гарц руу хүргэ.",
+  learn:"Функц дуудахдаа нэрийн ард заавал () хаалт тавина. Хаалт бол «одоо ажиллуул!» гэсэн дохио.",
+  ex:"player.move_forward()",
+  map:["#######","#P...E#","#######"]},
+ {name:"Movement with Functions",mn:"Эргэж явъя",fns:["move_forward","turn_left","turn_right"],best:5,
+  goal:"Ой дундуурх замаар гарц руу оч.",
+  learn:"Эхлээд газрын зургаа ажигла: дүр аль зүг рүү харж байна вэ? Гарц хаана байна вэ? Дараа нь кодоо дарааллаар нь бич.",
+  ex:"player.turn_left()\nplayer.turn_right()",
+  map:["#######","#P..###","###.###","###..E#","#######"]},
+ {name:"Collecting Items",mn:"Эрдэнэ цуглуул",fns:["move_forward","turn_left","turn_right","collect_item"],best:5,
+  goal:"2 эрдэнийг цуглуулаад гарц руу оч.",
+  learn:"Аргумент кодыг богино болгодог. move_forward(3) нь move_forward()-ийг 3 удаа бичсэнтэй ижил.",
+  ex:"player.move_forward(2)\nplayer.collect_item()",
+  map:["########","#P.*.*E#","########"]},
+ {name:"Pushing Objects",mn:"Чулуу түлх",fns:["move_forward","turn_left","turn_right","collect_item","push"],best:7,
+  goal:"Чулууг түлхэж замаа чөлөөлөөд гарц руу оч.",
+  learn:"push() дуудахад дүр чулуу руу харсан, яг хажууд нь зогсож байх ёстой. Чулуу нэг нүд урагшилна.",
+  ex:"player.push()",
+  map:["#######","#P.B..#","####.##","####E##","#######"]},
+ {name:"Printing on Screen",mn:"Hello гэж хэл",fns:["move_forward","turn_left","turn_right","collect_item","push","speak"],best:2,say:"Hello",
+  goal:"X тэмдэг дээр очоод Hello гэж хэл.",
+  learn:"Текстийг (String) заавал хашилт дотор бичнэ. Python-д дэлгэцэнд гаргахдаа print(), манай тоглоомд player.speak() ашиглана.",
+  ex:"player.speak(\"Hello\")",
+  map:["#######","#P..X.#","#######"]},
+ {name:"Mix It Up",mn:"Хослуулъя",fns:["move_forward","turn_left","turn_right","collect_item","push","speak"],best:9,
+  goal:"2 эрдэнийг цуглуулаад гарц руу оч.",
+  learn:"Урт кодыг бичихээсээ өмнө замаа хуруугаараа дэлгэц дээр зур. Алхам алхмаар гаргасан энэ төлөвлөгөөг алгоритм гэдэг.",
+  ex:"",
+  map:["#######","#P.*..#","#####.#","#E..*.#","#######"]},
+ {name:"Final Challenge",mn:"Эцсийн сорил",fns:["move_forward","turn_left","turn_right","collect_item","push","speak"],best:11,say:"Hello",
+  goal:"Чулууг түлх, X дээр Hello гэж хэлээд гарц руу оч.",
+  learn:"Алдаа гарвал айх хэрэггүй. Улаанаар тэмдэглэсэн мөрийг уншаад засна. Үүнийг дибаг хийх гэдэг.",
+  ex:"",
+  map:["#######","#P.B..#","####.##","#E.X.##","#######"]}
+ ]},
+ {n:2,title:"Хувьсагч ба өгөгдлийн төрөл",levels:[
+ {name:"Watering Objects",mn:"Тэвш услах",fns:["move_forward","turn_left","turn_right","collect_item","water"],best:13,
+  goal:"Баруун доод буланд байгаа усны савыг аваад 3 тэвшийг бүгдийг нь услаа.",
+  learn:"Эхлээд газрын зургийг ажигла: сав хаана байна, тэвшүүд хаана байна? Савгүйгээр water() ажиллахгүй. Хамгийн богино замыг төлөвлө.",
+  ex:"player.collect_item()\nplayer.water()",
+  map:["#########","#P.T.T.T#","#.......#","#......C#","#########"]},
+ {name:"Named Steps",mn:"Нэртэй алхам",fns:["move_forward","turn_left","turn_right"],best:9,needVar:true,noLiteral:["num"],
+  goal:"Ороомог замаар гарц руу оч. Дүрэм: хаалтанд тоо шууд бичихгүй, зөвхөн хувьсагч.",
+  learn:"Зам 4, 4, 2, 2 алхамтай. 4-ийг long, 2-ыг short гэж нэрлээд дахин дахин ашигла. Хувьсагчийн нэр утгыг нь тайлбарлаж байвал код уншихад амар.",
+  ex:"long = 4\nplayer.move_forward(long)",
+  snips:["long = 4","short = 2"],
+  map:["#######","#P....#","#####.#","###E#.#","###.#.#","###...#","#######"]},
+ {name:"Numbers vs Text",mn:"Алдааг ол",fns:["move_forward","turn_left","turn_right","place"],best:7,needVar:true,
+  goal:"Энэ код 3 алдаатай. Run дараад Terminal-ийн мэдээг уншиж, алдааг нэг нэгээр нь засаарай.",
+  learn:"4 бол тоо (int), \"4\" бол текст (str). Тоо хашилтгүй бичигдэнэ. Python том, жижиг үсгийг ялгадаг тул Bricks, bricks хоёр өөр нэр. Тайлбар бичих бол мөрийн эхэнд # тавина.",
+  ex:"planks = 4      # тоо\nname = \"Pumpkin\" # текст",
+  starter:"import player\n# Банз ба тоосгоны тоо\nplanks = \"4\"\nBricks = 3\nЭхлээд банз тавина\nplayer.move_forward(2)\nplayer.place(planks)\nplayer.move_forward(2)\nplayer.place(bricks)\nplayer.move_forward(2)\n",
+  map:["#########","#P.4.3.E#","#########"]},
+ {name:"Crop Names",mn:"Ургацын нэр",fns:["move_forward","turn_left","turn_right","speak"],best:13,noLiteral:["str"],says:{X:"Pumpkin",Y:"Carrot",Z:"Corn"},
+  goal:"X дээр Pumpkin, Y дээр Carrot, Z дээр Corn гэж хэл. Дүрэм: үг бүрийг текст хувьсагчид хадгална.",
+  learn:"Текст хувьсагч олон байж болно: bag1, bag2, bag3. Тэмдэг бүр дээр зөв хувьсагчаа хэлэх ёстой. Хувьсагчийн нэрийг хашилтгүй бичнэ!",
+  ex:"bag1 = \"Pumpkin\"\nplayer.speak(bag1)",
+  snips:["bag1 = \"Pumpkin\"","player.speak(bag1)"],
+  map:["#######","#P.X..#","#####.#","#Z.Y..#","#######"]},
+ {name:"Building Fences",mn:"Хашаа барих",fns:["move_forward","turn_left","turn_right","place"],best:16,needVar:true,noLiteral:["num"],
+  goal:"4 талбайд хашаа барь: 4-тэйд банз, 3-тайд тоосго тавиад гарц руу оч. Дүрэм: бүх тоог хувьсагчаар.",
+  learn:"Нэг хувьсагчийг олон удаа ашиглаж болно. step, planks, bricks гурван хувьсагч л хангалттай. Утгыг нэг газар өөрчлөхөд код бүхэлдээ өөрчлөгдөнө.",
+  ex:"step = 2\nplanks = 4\nbricks = 3",
+  snips:["step = 2","planks = 4","bricks = 3","player.place(planks)"],
+  map:["#########","#P.4.3..#","#######.#","#E.3.4..#","#########"]},
+ {name:"One Variable",mn:"Ганц хувьсагч",fns:["move_forward","turn_left","turn_right"],best:11,needVar:true,noLiteral:["num"],maxVars:1,
+  goal:"Гарц руу оч. Дүрэм: зөвхөн НЭГ хувьсагч (steps) ашиглана, утгыг нь шаардлагатай үед өөрчил.",
+  learn:"Хувьсагчид шинэ утга оноовол хуучин утга нь устаж, шинэ нь хадгалагдана. Санах ойн хайрцаг дахь тоо хэрхэн солигдож байгааг ажигла.",
+  ex:"steps = 5\nplayer.move_forward(steps)\nsteps = 2",
+  snips:["steps = 5","player.move_forward(steps)"],
+  map:["########","#P.....#","######.#","###....#","###.####","###E####","########"]},
+ {name:"Big Farm",mn:"Том фермийн сорил",fns:["move_forward","turn_left","turn_right","collect_item","water","place","speak"],best:20,needVar:true,noLiteral:["num","str"],says:{X:"Pumpkin"},
+  goal:"Сав ав, 2 тэвш услаа, 2 талбайд 4 банз тавь, X дээр Pumpkin гэж хэлээд гарц руу оч. Дүрэм: бүх тоо, текст хувьсагчаар.",
+  learn:"Урт кодоо хэсэг хэсгээр нь # коммент бичиж хуваа: # 1. Тэвш услах, # 2. Хашаа барих. Алхамаар товчоор нэг нэг мөрөөр шалга.",
+  ex:"# 1. Тэвш услах\nstep = 2\ncrop = \"Pumpkin\"",
+  snips:["step = 2","planks = 4","crop = \"Pumpkin\"","# тайлбар"],
+  map:["###########","#P.C.T.T..#","#########.#","#E.X.4.4..#","###########"]}
+ ]}
+];
+
+/* Codebook: command reference (from the KAMI codebook app). try = [chapter, level] where the command can be played */
+var CODEBOOK=[
+ {f:"move_forward",syn:"player.move_forward([алхмын тоо])",try:[0,0],
+  d:"Тоглогчийг харж буй чиглэл рүү нь урагшлуулна, хэрэв замд саад байхгүй бол. Хэдэн алхам явахыг хаалтанд бичиж болно. Хоосон орхивол нэг алхам урагшилна.",
+  ex:"player.move_forward(3)",exd:"Тоглогч газрын зураг дээр 3 алхам урагшилна."},
+ {f:"turn_left",syn:"player.turn_left()",try:[0,1],
+  d:"Тоглогчийг зүүн тийш эргүүлж, одоогийн чиглэлээс нь зүүн зүг рүү харуулна.",
+  ex:"player.turn_left()\nplayer.move_forward()",exd:"Зүүн тийш эргээд тэр чиглэлдээ урагшилна."},
+ {f:"turn_right",syn:"player.turn_right()",try:[0,1],
+  d:"Тоглогчийг баруун тийш эргүүлж, одоогийн чиглэлээс нь баруун зүг рүү харуулна.",
+  ex:"player.turn_right()\nplayer.move_forward()",exd:"Баруун тийш эргээд тэр чиглэлдээ урагшилна."},
+ {f:"push",syn:"player.push()",try:[0,3],
+  d:"Тоглогчийн харж буй чиглэлд байгаа объектыг түлхэнэ, хэрэв цаана нь саад байхгүй бол.",
+  ex:"player.turn_left()\nplayer.push()",exd:"Зүүн тийш эргээд урд байгаа объектыг түлхэнэ."},
+ {f:"speak",syn:"player.speak([мессеж])",try:[0,4],
+  d:"Хаалтанд бичсэн текстийг тоглогч хэлнэ. Тоглоом дээр текст тоглогчийн толгойн дээр гарч ирнэ.",
+  ex:"player.speak(\"Hello World\")",exd:"\"Hello World\" гэсэн үг тоглогчийн толгойн дээр гарна."},
+ {f:"build",syn:"player.build([барих объект])",
+  d:"Хаалтанд бичсэн объектыг барина. Барих боломжтой объект хязгаартай, тус бүр өөрийн нөхцөлтэй. Объект тоглогчийн харж буй чиглэлд, тэр газар сул байвал баригдана.",
+  ex:"player.build(\"bridge\")",exd:"Тоглогчийн өмнө гүүр барина."},
+ {f:"water",syn:"player.water()",try:[1,0],
+  d:"Тоглоом дахь объектуудыг услана: ургамал услах, тэвш дүүргэх гэх мэт. Ихэвчлэн фермийн ажилд хэрэглэнэ.",
+  ex:"player.water()",exd:"Тоглогчийн харж буй объектыг усална."},
+ {f:"collect",syn:"player.collect(string)",
+  d:"Нөөц цуглуулна. Ихэвчлэн дуусдаг зүйлсийг дахин дүүргэхэд хэрэглэнэ, жишээ нь саванд ус авах.",
+  ex:"player.collect(\"water\")\nplayer.turn_left()\nplayer.water()",exd:"Ус аваад зүүн тийш эргэж объект услана."},
+ {f:"open",syn:"player.open([нээх объект])",
+  d:"Хаалга болон сав нээнэ. Ингэснээр цааш нэвтрэх эсвэл доторх зүйлийг авах боломжтой болно.",
+  ex:"player.turn_left()\nplayer.open()\nplayer.move_forward()",exd:"Зүүн тийш эргэж хаалга нээгээд цааш нэвтэрнэ."},
+ {f:"close",syn:"player.close()",
+  d:"Хаалга болон сав хаана. Ард тань үлдсэн хаалгыг хаах, саванд юм хийсний дараа хаахад хэрэглэнэ.",
+  ex:"player.open()\nplayer.collect(\"item\")\nplayer.close()",exd:"Сав нээж, доторх зүйлийг аваад буцааж хаана."},
+ {f:"place",syn:"player.place([байрлуулах объект])",try:[1,2],
+  d:"Объект, зүйл эсвэл хувьсагчийг зөвшөөрөгдсөн газар байрлуулна. Ихэвчлэн саванд хийх эсвэл тодорхой газар тавихад хэрэглэнэ.",
+  ex:"wheat = 6\nplayer.place(wheat)",exd:"wheat хувьсагчид 6 гэж хадгалаад түүнийг байрлуулна."},
+ {f:"combine",syn:"player.combine(mixture)",
+  d:"Хэд хэдэн объектыг нэгтгэж шинэ объект үүсгэнэ. Ихэвчлэн хоол, ундаа хийхэд хэрэглэнэ.",
+  ex:"player.combine(jar)",exd:"jar жагсаалтад байгаа бүх зүйлийг нэгтгэж шинэ зүйл хийнэ."},
+ {f:"plant",syn:"player.plant(dictionary, key)",
+  d:"Газар тариа тарина. Dictionary ашигладаг бөгөөд 2 параметр авна: dictionary-ийн нэр болон key.",
+  ex:"player.plant(seeds, \"Eggplant\")",exd:"seeds dictionary-ээс Eggplant-ийн үрийг тарина."},
+ {f:"write",syn:"await player.write(message)",
+  d:"Popup мессеж харуулна. Энэ нь async функц: level-д урьдчилан бэлтгэсэн мессежийг харуулж, хаагдах хүртэл програм түр зогсоно.",
+  ex:"await player.write('Hello World')",exd:"Popup мессеж гарч, тоглогч хаах хүртэл програм хүлээнэ."},
+ {f:"read",syn:"await player.read()",
+  d:"Объект, сав эсвэл мэдээлэл уншина. Савны доторх агуулгыг шалгах, мессеж уншихад хэрэглэнэ.",
+  ex:"await player.read()",exd:"Тоглогч урд байгаа савны доторхыг уншина."},
+ {f:"question",syn:"await player.question(question)",
+  d:"Yes/No асуулттай popup харуулна. Энэ нь async функц бөгөөд хэрэглэгчийн сонголтоос хамаарч True эсвэл False буцаана.",
+  ex:"async def question_function():\n  answer = await player.question(\"Асуух асуулт\")\n  if answer:\n    # Yes гэвэл хийх үйлдэл\n  else:\n    # No гэвэл хийх үйлдэл",exd:"Асуулт гарч, хариултаас хамаарч дараагийн үйлдэл сонгогдоно."},
+ {f:"display",syn:"await player.display(message)",
+  d:"Тоглогчид мессеж харуулна.",
+  ex:"await player.display(\"Энд хүссэн зүйлээ бичнэ\")",exd:"Тоглогчид мессеж харагдана."}
+];
+
+(function(){
+const $=id=>document.getElementById(id);
+let ch=0,lv=0,cell=56,W,player,hd,bubble,pos,dir,turns,gemEls={},rockEls={},canEl=null,trail=[],events=null,evi=0,timer=null,running=false,done=new Set(),muted=false,mem={};
+const codes={};
+const START="import player\n\n";
+const key=()=>ch+"-"+lv,L=()=>CHAPTERS[ch].levels[lv];
+function loadSaved(){try{const s=JSON.parse(localStorage.getItem("kami-code-v3")||"{}");Object.assign(codes,s.codes||{});(s.done||[]).forEach(d=>done.add(d));if(s.ch!=null){ch=s.ch;lv=s.lv||0}}catch(e){}}
+function save(){try{localStorage.setItem("kami-code-v3",JSON.stringify({codes,done:[...done],ch,lv}))}catch(e){}}
+
+let ac=null;
+function tone(f,d,type,delay){if(muted)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime+(delay||0);o.type=type||"square";o.frequency.value=f;g.gain.setValueAtTime(.07,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+d)}catch(e){}}
+const snd={move:()=>tone(660,.07),turn:()=>tone(520,.09,"triangle"),bump:()=>{tone(140,.25,"sawtooth");tone(110,.25,"sawtooth",.1)},collect:()=>{tone(988,.08,"triangle");tone(1318,.12,"triangle",.07)},push:()=>tone(200,.18,"square"),speak:()=>tone(740,.12,"sine"),water:()=>{tone(400,.2,"sine");tone(500,.2,"sine",.1)},place:()=>tone(300,.1,"square"),assign:()=>tone(1046,.06,"triangle"),win:()=>[523,659,784,1046].forEach((f,i)=>tone(f,.18,"triangle",i*.12))};
+
+/* ---------- navigation ---------- */
+function buildNav(){const c=$("chapters");c.innerHTML="";
+  CHAPTERS.forEach((C,i)=>{const b=document.createElement("button");b.className="ch"+(i===ch?" cur":"");b.textContent="Бүлэг "+C.n;b.setAttribute("role","tab");b.setAttribute("aria-selected",i===ch);b.onclick=()=>{if(!running&&i!==ch){ch=i;load(0)}};c.appendChild(b)});
+  const box=$("levels");box.querySelectorAll(".lv").forEach(b=>b.remove());
+  CHAPTERS[ch].levels.forEach((l,i)=>{const b=document.createElement("button");b.className="lv"+(i===lv?" cur":"")+(done.has(ch+"-"+i)?" done":"");b.textContent=i+1;b.title=l.name;b.setAttribute("aria-label","Level "+(i+1)+": "+l.mn);b.onclick=()=>{if(!running)load(i)};box.appendChild(b)});
+  $("chSub").textContent="Бүлэг "+CHAPTERS[ch].n+" · "+CHAPTERS[ch].title}
+
+/* ---------- level & board ---------- */
+function load(i){stop();lv=i;events=null;const l=L();W=KAMI.parseMap(l);save();
+  $("lvEyebrow").textContent="БҮЛЭГ "+CHAPTERS[ch].n+" · LEVEL "+(i+1)+" · "+l.name.toUpperCase();$("lvTitle").textContent=l.mn;$("lvGoal").textContent=l.goal;
+  $("learnText").textContent=l.learn;const R=[];if(l.needVar)R.push("Хувьсагч заавал");if((l.noLiteral||[]).indexOf("num")>=0)R.push("Тоог шууд бичихгүй");if((l.noLiteral||[]).indexOf("str")>=0)R.push("Текстийг хувьсагчаар");if(l.maxVars)R.push("Ганц хувьсагч");if(l.starter)R.push("Алдаатай кодыг зас");$("rules").innerHTML=R.map(r=>"<span>"+r+"</span>").join("");$("rules").hidden=!R.length;$("learnEx").textContent=l.ex;$("learnEx").hidden=!l.ex;$("bestN").textContent=l.best;
+  const b=$("board");b.innerHTML="";b.style.gridTemplateColumns="repeat("+W.cols+",var(--cell))";
+  for(let y=0;y<W.rows;y++)for(let x=0;x<W.cols;x++){const k=x+","+y,c=document.createElement("div");
+    c.className="cell"+(W.walls.has(k)?" wall":"")+(k===W.exit?" exit":"")+(k in W.marks?" mark":"")+(W.troughs.has(k)?" trough":"")+(k in W.sites?" site":"");
+    if(k in W.sites)c.innerHTML="<span>0/"+W.sites[k]+"</span>";if(k in W.marks&&W.marks[k]!=="X")c.dataset.m=W.marks[k];c.dataset.k=k;b.appendChild(c)}
+  if(W.exit)b.appendChild(spr("exitspr","doorg",W.exit));
+  gemEls={};W.gems.forEach(k=>{gemEls[k]=spr("gem","gemg",k);b.appendChild(gemEls[k])});
+  canEl=null;if(W.canteen){canEl=spr("can","cang",W.canteen);b.appendChild(canEl)}
+  rockEls={};W.rocks.forEach(k=>{const r=spr("rock","rockg",k);r.dataset.orig=k;rockEls[k]=r;b.appendChild(r)});
+  player=document.createElement("div");player.className="spr player";player.innerHTML='<div class="hd"></div><svg viewBox="0 0 40 40"><use href="#robo"/></svg><svg class="carry" viewBox="0 0 40 40"><use href="#cang"/></svg>';b.appendChild(player);hd=player.querySelector(".hd");
+  $("code").value=codes[key()]!=null?codes[key()]:(l.starter||START);
+  legend();buildChips();buildNav();$("memCard").hidden=CHAPTERS[ch].n<2;resetWorld();fit();gutter();
+  term([['dim',"# Level "+(i+1)+": "+l.goal+"\n# Кодоо бичээд ▶ Run дар."]]);}
+function legend(){const items=[["var(--accent)","Дүрийн харах чиглэл"]];
+  if(W.gems.size)items.push(["var(--gem)","Эрдэнэ"]);if(W.canteen)items.push(["var(--water)","Усны сав"]);if(W.troughs.size)items.push(["#f3e3c8","Тэвш (X дээр зогсож услана)"]);
+  if(Object.keys(W.sites).length)items.push(["#f6ead9","Барилгын талбай (хэрэгтэй тоо)"]);if(W.rocks.size)items.push(["#9aa6b8","Чулуу"]);if(Object.keys(W.marks).length)items.push(["#fde6ea","X Y Z: энд хэлнэ"]);if(W.exit)items.push(["#fff3c4","Гарц"]);
+  $("legend").innerHTML=items.map(([c,t])=>'<span><i style="background:'+c+'"></i>'+t+"</span>").join("")}
+function spr(cls,sym,k){const e=document.createElement("div");e.className="spr "+cls;e.innerHTML='<svg viewBox="0 0 40 40"><use href="#'+sym+'"/></svg>';e.dataset.k=k;return e}
+function xy(k){const p=k.split(",");return {x:+p[0],y:+p[1]}}
+function putEl(e,k){const p=xy(k);e.style.transform="translate("+p.x*cell+"px,"+p.y*cell+"px)"}
+function cellEl(k){return $("board").querySelector('.cell[data-k="'+k+'"]')}
+function fit(){const w=$("boardWrap").clientWidth-8;cell=Math.max(28,Math.floor(Math.min(64,w/W.cols)));$("board").style.setProperty("--cell",cell+"px");
+  $("board").querySelectorAll(".spr").forEach(e=>{if(e!==player&&!e.classList.contains("got"))putEl(e,e.dataset.k)});place(false)}
+function place(anim){if(!anim){player.style.transition="none";hd.style.transition="none";requestAnimationFrame(()=>{player.style.transition="";hd.style.transition=""})}
+  player.style.transform="translate("+pos.x*cell+"px,"+pos.y*cell+"px)";hd.style.transform="rotate("+turns*90+"deg)"}
+function resetWorld(){pos={...W.start};dir=W.dir;turns=W.dir;player.classList.remove("bump","happy","has");if(bubble){bubble.remove();bubble=null}
+  trail.forEach(c=>c.classList.remove("trail"));trail=[];
+  Object.values(gemEls).forEach(e=>{e.classList.remove("got");putEl(e,e.dataset.k)});if(canEl){canEl.classList.remove("got");putEl(canEl,canEl.dataset.k)}
+  const rs=Object.values(rockEls);rockEls={};rs.forEach(e=>{const k=e.dataset.orig;e.dataset.k=k;rockEls[k]=e;putEl(e,k)});
+  $("board").querySelectorAll(".mark,.trough,.site").forEach(c=>{c.classList.remove("done","full");if(c.classList.contains("site"))c.firstChild.textContent="0/"+W.sites[c.dataset.k]});
+  mem={};renderMem();place(false);hl(0)}
+
+/* ---------- memory ---------- */
+function renderMem(flash){const m=$("mem"),ks=Object.keys(mem);
+  if(!ks.length){m.innerHTML='<span class="empty">Код ажиллахад хувьсагчид энд хайрцаг болж гарч ирнэ.</span>';return}
+  m.innerHTML=ks.map(k=>{const v=mem[k];return '<div class="box'+(k===flash?" flash":"")+'"><div class="nm">'+esc(k)+"<em>"+(v.kind==="str"?"str · текст":"int · тоо")+'</em></div><div class="vl">'+esc(v.kind==="str"?'"'+v.v+'"':String(v.v))+"</div></div>"}).join("");
+  if(flash)setTimeout(()=>{const b=m.querySelector(".flash");if(b)b.classList.remove("flash")},250)}
+
+/* ---------- editor ---------- */
+const FNS=[["move_forward","player.move_forward()"],["turn_left","player.turn_left()"],["turn_right","player.turn_right()"],["collect_item","player.collect_item()"],["push","player.push()"],["speak",'player.speak("Hello")'],["water","player.water()"],["place","player.place(planks)"]];
+function buildChips(){const c=$("chips");c.innerHTML="";const l=L();
+  const add=(txt,cls)=>{const b=document.createElement("button");b.className="chip"+(cls?" "+cls:"");b.textContent=txt;b.onclick=()=>insertLine(txt);c.appendChild(b)};
+  (l.snips||[]).forEach(s=>add(s,"var"));
+  FNS.forEach(([f,txt])=>{if(l.fns.indexOf(f)>=0&&!(l.snips||[]).some(s=>s.indexOf("player."+f+"(")===0))add(f==="speak"&&l.say&&!l.noLiteral?'player.speak("'+l.say+'")':txt)})}
+function insertLine(txt){if(running)return;const ta=$("code");let v=ta.value;const p=ta.selectionEnd;
+  let lineEnd=v.indexOf("\n",p);if(lineEnd<0)lineEnd=v.length;const lineStart=v.lastIndexOf("\n",p-1)+1,cur=v.slice(lineStart,lineEnd);
+  let nv,caret;if(cur.trim()===""){nv=v.slice(0,lineStart)+txt+v.slice(lineEnd);caret=lineStart+txt.length}else{nv=v.slice(0,lineEnd)+"\n"+txt+v.slice(lineEnd);caret=lineEnd+1+txt.length}
+  ta.value=nv;ta.focus();ta.setSelectionRange(caret,caret);onEdit();tone(880,.04,"triangle")}
+function gutter(active,errLn){const n=$("code").value.split("\n").length,g=$("gutter");let h="";for(let i=1;i<=Math.max(n,12);i++)h+='<div class="'+(i===errLn?"err":i===active?"act":"")+'">'+(i<=n?i:"")+"</div>";g.innerHTML=h;g.scrollTop=$("code").scrollTop}
+function hl(ln,err){const h=$("hl");if(!ln){h.hidden=true;gutter();return}h.hidden=false;h.className="hl"+(err?" err":"");
+  const ta=$("code"),top=12+(ln-1)*26-ta.scrollTop;if(top<0||top>ta.clientHeight-20)ta.scrollTop=Math.max(0,(ln-4)*26);
+  h.style.top=(12+(ln-1)*26-ta.scrollTop)+"px";gutter(err?0:ln,err?ln:0)}
+function onEdit(){codes[key()]=$("code").value;save();if(events){stop();events=null;resetWorld()}gutter()}
+
+/* ---------- terminal ---------- */
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c])}
+function term(lines){$("term").innerHTML=lines.map(([c,t])=>'<span class="'+c+'">'+esc(t)+"</span>").join("\n")}
+function termAdd(c,t){const e=$("term");e.innerHTML+=(e.innerHTML?"\n":"")+'<span class="'+c+'">'+esc(t)+"</span>";e.scrollTop=e.scrollHeight}
+
+/* ---------- run ---------- */
+function prepare(){resetWorld();const l=L(),p=KAMI.parse($("code").value,l.fns,l);
+  term([["dim","$ python main.py"]]);
+  if(p.error){events=null;showErr(p.error,true);return false}
+  events=KAMI.simulate(l,p.ops);evi=0;events.lines=KAMI.countLines(p.ops);return true}
+function showErr(e,before){hl(e.ln,true);if(e.ln)termAdd("er",(before?"Код ажиллаагүй. ":"")+e.ln+"-р мөр");termAdd("er",e.type+": "+e.msg);setBtns()}
+function stepOnce(){const e=events[evi++];if(!e)return false;
+  if(e.ln)hl(e.ln);
+  switch(e.t){
+    case "assign":mem[e.name]={v:e.v,kind:e.kind};renderMem(e.name);snd.assign();break;
+    case "move":{const c=cellEl(pos.x+","+pos.y);if(c){c.classList.add("trail");trail.push(c)}pos={x:e.x,y:e.y};place(true);snd.move();break}
+    case "turn":{turns+=((e.d-dir+4)%4===3)?-1:1;dir=e.d;place(true);snd.turn();break}
+    case "bump":player.classList.remove("bump");void player.offsetWidth;player.classList.add("bump");snd.bump();break;
+    case "collect":{const g=gemEls[e.k];if(g)g.classList.add("got");snd.collect();termAdd("ok","+1 эрдэнэ");break}
+    case "canteen":if(canEl)canEl.classList.add("got");player.classList.add("has");snd.collect();termAdd("ok","Усны савыг авлаа");break;
+    case "water":{const c=cellEl(e.k);if(c)c.classList.add("full");snd.water();termAdd("ok","Тэвш дүүрлээ");break}
+    case "place":{const c=cellEl(e.k);if(c){c.firstChild.textContent=e.n+"/"+e.need;c.classList.toggle("full",e.n===e.need)}snd.place();termAdd(e.n>e.need?"er":"ok",e.n+"/"+e.need+" тавьсан");break}
+    case "push":{const r=rockEls[e.from];delete rockEls[e.from];rockEls[e.to]=r;r.dataset.k=e.to;putEl(r,e.to);snd.push();break}
+    case "speak":{if(bubble)bubble.remove();bubble=document.createElement("div");bubble.className="bubble";bubble.textContent=e.text;player.appendChild(bubble);snd.speak();termAdd("say","player: "+e.text);
+      const hasM=Object.keys(W.marks).length;if(e.ok){const m=cellEl(e.k);if(m)m.classList.add("done")}else if(hasM&&!e.on)termAdd("dim","# Тэмдэг дээр биш газар хэллээ");else if(e.want)termAdd("dim","# Энд \""+e.want+"\" гэж хэлэх ёстой");break}
+    case "print":termAdd("",e.text);break;
+    case "error":stop();showErr(e,false);return false;
+    case "win":stop();hl(0);termAdd("ok","Амжилттай! Level "+(lv+1)+" дууслаа.");win(events.lines);return false;
+  }
+  if(evi>=events.length){stop();return false}return true}
+function run(){if(running)return;if(!events||evi>=events.length||evi===0){if(!prepare())return}
+  running=true;setBtns();const tick=()=>{if(!running)return;if(stepOnce())timer=setTimeout(tick,events[evi-1]&&events[evi-1].t==="assign"?500:340)};timer=setTimeout(tick,120)}
+function step(){if(running)return;if(!events||evi>=events.length){if(!prepare())return}stepOnce();setBtns()}
+function stop(){running=false;clearTimeout(timer);setBtns()}
+function setBtns(){$("runBtn").disabled=running;$("stepBtn").disabled=running;$("code").readOnly=running}
+function win(n){done.add(key());save();buildNav();player.classList.add("happy");snd.win();
+  const best=L().best,st=n<=best?3:n<=best+2?2:1;$("stars").innerHTML=[0,1,2].map(i=>'<span class="'+(i<st?"on":"off")+'">★</span>').join("");
+  const lastLv=lv===CHAPTERS[ch].levels.length-1,lastCh=ch===CHAPTERS.length-1;
+  $("winTitle").textContent=lastLv?"Бүлэг "+CHAPTERS[ch].n+"-ийг дуусгалаа!":"Level "+(lv+1)+" дууслаа!";
+  $("winText").textContent="Чиний код "+n+" мөр. "+(st===3?"Хамгийн богино код! Жинхэнэ програмист шиг.":"Хамгийн богино нь "+best+" мөр. Илүү богино бичиж чадах уу?");
+  $("nextBtn").textContent=lastLv?(lastCh?"Бүлэг 1 руу буцах":"Бүлэг "+CHAPTERS[ch+1].n+" эхлэх →"):"Дараагийн level →";confetti();setTimeout(()=>{$("win").hidden=false},700)}
+function confetti(){const sy=["★","●","◆","▲"],cl=["#ffc23c","#ff8a1f","#17ad9f","#2fb5e8","#f0598a"];for(let i=0;i<40;i++){const s=document.createElement("span");s.className="confetti";s.textContent=sy[i%4];s.style.left=Math.random()*100+"vw";s.style.color=cl[i%5];s.style.animationDuration=(1.6+Math.random()*1.6)+"s";s.style.animationDelay=Math.random()*.5+"s";document.body.appendChild(s);setTimeout(()=>s.remove(),4000)}}
+
+/* ---------- wiring ---------- */
+$("code").addEventListener("input",onEdit);
+$("code").addEventListener("scroll",()=>{$("gutter").scrollTop=$("code").scrollTop;if(!$("hl").hidden)$("hl").hidden=true});
+$("code").addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();run()}});
+$("runBtn").onclick=run;$("stepBtn").onclick=step;
+$("resetBtn").onclick=()=>{stop();events=null;resetWorld();term([["dim","# Эхлэл байрлал руу буцлаа."]])};
+$("muteBtn").onclick=e=>{muted=!muted;e.target.textContent="Дуу: "+(muted?"унтраалттай":"асаалттай");e.target.setAttribute("aria-pressed",muted)};
+$("againBtn").onclick=()=>{$("win").hidden=true;events=null;resetWorld();$("code").focus()};
+$("nextBtn").onclick=()=>{$("win").hidden=true;const lastLv=lv===CHAPTERS[ch].levels.length-1;if(!lastLv)load(lv+1);else{ch=ch===CHAPTERS.length-1?0:ch+1;load(0)}};
+window.addEventListener("resize",()=>{if(!$("gameView").hidden)fit()});
+
+/* ---------- codebook & views ---------- */
+function showView(v){const game=v==="game";
+  $("bookView").hidden=game;$("gameView").hidden=!game;$("gameNav").hidden=!game;
+  $("vwBook").classList.toggle("cur",!game);$("vwGame").classList.toggle("cur",game);
+  $("vwBook").setAttribute("aria-selected",!game);$("vwGame").setAttribute("aria-selected",game);
+  if(game){buildNav();fit()}else{stop();$("chSub").textContent="Codebook · командын лавлах"}
+  window.scrollTo(0,0)}
+function buildBook(){
+  $("cbJump").innerHTML=CODEBOOK.map(c=>'<a href="#cb-'+c.f+'">'+c.f+"()</a>").join("");
+  $("cbGrid").innerHTML=CODEBOOK.map((c,i)=>'<article class="card cmd" id="cb-'+c.f+'" data-q="'+esc((c.f+" "+c.syn+" "+c.d).toLowerCase())+'"><div>'
+    +'<div class="cmd-top"><span class="cmd-n">'+(i+1)+"</span><h3>"+c.f+"()</h3></div>"
+    +'<p class="lbl">Бичиглэл</p><pre class="syn">'+esc(c.syn)+"</pre>"
+    +'<p class="lbl">Тайлбар</p><p class="desc">'+esc(c.d)+"</p>"
+    +'<p class="lbl">Жишээ</p><pre class="ex">'+esc(c.ex)+'</pre><p class="exd">'+esc(c.exd)+"</p></div>"
+    +'<div><img src="/codebook/'+c.f+'.png" alt="'+c.f+'() командын зурагт тайлбар" loading="lazy" width="336" height="336">'
+    +(c.try?'<button class="btn tryit" data-ch="'+c.try[0]+'" data-lv="'+c.try[1]+'">▶ Тоглоомд турших</button>':"")+"</div></article>").join("");
+  $("cbGrid").querySelectorAll(".tryit").forEach(b=>b.onclick=()=>{ch=+b.dataset.ch;load(+b.dataset.lv);showView("game")})}
+$("cbSearch").addEventListener("input",e=>{const q=e.target.value.trim().toLowerCase();let n=0;
+  $("cbGrid").querySelectorAll(".cmd").forEach(a=>{const ok=!q||a.dataset.q.indexOf(q)>=0;a.hidden=!ok;if(ok)n++});$("cbEmpty").hidden=n>0});
+$("vwBook").onclick=()=>showView("book");$("vwGame").onclick=()=>showView("game");$("cbPlay").onclick=()=>showView("game");
+
+buildBook();
+loadSaved();if(!CHAPTERS[ch]||!CHAPTERS[ch].levels[lv]){ch=0;lv=0}load(lv);showView("book");
+})();
+</script>
+
+</body></html>

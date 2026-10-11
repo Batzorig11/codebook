@@ -77,6 +77,7 @@ const LABELS = {
       "Python-ийг тоглоомын даалгавраар ойлгож, бүлэг бүрийн кодыг алхам алхмаар судлаарай.",
     chooseChapter: "Бүлгээ сонгох",
     openCodebook: "Codebook нээх",
+    codePlayground: "Код талбай",
     studentGuides: "Сурагчийн гарын авлага",
     chaptersLabel: "9 бүлэг",
     sectionTitle: "Сурах замаа сонго",
@@ -93,6 +94,7 @@ const LABELS = {
       "Learn Python through game challenges and explore each chapter's code step by step.",
     chooseChapter: "Choose a Chapter",
     openCodebook: "Open Codebook",
+    codePlayground: "Code Playground",
     studentGuides: "Student Guides",
     chaptersLabel: "9 chapters",
     sectionTitle: "Choose Your Path",
@@ -143,6 +145,13 @@ export default function Home() {
                 >
                   <HugeiconsIcon icon={Rocket02Icon} size={22} strokeWidth={2.2} />
                   {L.chooseChapter}
+                </Link>
+                <Link
+                  href="/kami-code"
+                  className="kid-focus inline-flex items-center justify-center gap-2 rounded-lg border-2 border-white bg-white/12 px-5 py-4 text-base font-black text-white backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/22"
+                >
+                  <HugeiconsIcon icon={GameController03Icon} size={22} strokeWidth={2.2} />
+                  {L.codePlayground}
                 </Link>
                 <Link
                   href="/codebook"

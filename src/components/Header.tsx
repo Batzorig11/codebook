@@ -5,6 +5,7 @@ import Link from "next/link";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   BookOpen01Icon,
+  GameController03Icon,
   Home03Icon,
   SchoolIcon,
 } from "@hugeicons/core-free-icons";
@@ -13,8 +14,8 @@ import LangToggle from "@/components/LangToggle";
 import { useLang } from "@/context/LangContext";
 
 const LABELS = {
-  mn: { home: "Нүүр", guides: "Гарын авлага" },
-  en: { home: "Home", guides: "Guides" },
+  mn: { home: "Нүүр", guides: "Гарын авлага", playground: "Код талбай" },
+  en: { home: "Home", guides: "Guides", playground: "Playground" },
 } as const;
 
 export default function Header() {
@@ -49,6 +50,13 @@ export default function Header() {
           >
             <HugeiconsIcon icon={SchoolIcon} size={18} strokeWidth={2} />
             {L.guides}
+          </Link>
+          <Link
+            href="/kami-code"
+            className="kid-focus hidden items-center gap-2 rounded-lg px-3 py-2 text-sm font-bold text-[#17324d] transition hover:bg-[#e0f2fe] dark:text-[#e7f7ff] dark:hover:bg-white/10 sm:inline-flex"
+          >
+            <HugeiconsIcon icon={GameController03Icon} size={18} strokeWidth={2} />
+            {L.playground}
           </Link>
           <Link
             href="/codebook"
